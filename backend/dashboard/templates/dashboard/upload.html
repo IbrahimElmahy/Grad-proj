@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVMS | New Inspection</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 20%);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: 100%;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-right: var(--glass-border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 3rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .file-upload-wrapper {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            display: block;
+            /* Important: label is inline by default */
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--accent-blue);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        #preview-container {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        #preview-img,
+        #preview-video {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 0.5rem;
+            display: none;
+        }
+
+        .btn-remove {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn-upload {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--accent-blue);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .result-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .result-info {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">RVMS</div>
+            <a href="{% url 'dashboard_index' %}" class="nav-item">Dashboard</a>
+            <div class="nav-item active">New Inspection</div>
+            <div class="nav-item">Inspections</div>
+            <div class="nav-item">Reports</div>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <h1>Analyze Runway</h1>
+
+                <form id="uploadForm">
+                    <label class="file-upload-wrapper" id="dropZone" for="imageInput">
+                        <div id="uploadPrompt">
+                            <p>Click or Drag to Upload</p>
+                            <small>Supports Images (JPG, PNG) and Videos (MP4)</small>
+                        </div>
+
+                        <div id="preview-container">
+                            <img id="preview-img" />
+                            <video id="preview-video" controls></video>
+                            <button type="button" class="btn-remove" id="removeBtn">Remove</button>
+                        </div>
+                    </label>
+                    <input type="file" id="imageInput" accept="image/*,video/*" required>
+
+                    <button type="submit" class="btn-upload">Analyze Now</button>
+                </form>
+
+                <div class="loading" id="loading">Processing AI Analysis... <br> This may take a moment for videos.
+                </div>
+
+                <div id="resultArea" style="display:none; margin-top:2rem;">
+                    <h3>Analysis Result</h3>
+                    <p><strong>Status:</strong> <span id="resStatus"></span></p>
+                    <p><strong>Risk Level:</strong> <span id="resRisk"></span></p>
+
+                    <h4>Detected Hazards (Screenshots)</h4>
+                    <div class="results-grid" id="resGrid">
+                        <!-- Items go here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImg = document.getElementById('preview-img');
+        const previewVideo = document.getElementById('preview-video');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const removeBtn = document.getElementById('removeBtn');
+        const form = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const resultArea = document.getElementById('resultArea');
+
+        imageInput.addEventListener('change', function (e) {
+            handleFile(e.target.files[0]);
+        });
+
+        removeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            imageInput.value = '';
+            previewImg.style.display = 'none';
+            previewVideo.style.display = 'none';
+            previewContainer.style.display = 'none';
+            uploadPrompt.style.display = 'block';
+        });
+
+        function handleFile(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                uploadPrompt.style.display = 'none';
+                previewContainer.style.display = 'block';
+
+                if (file.type.startsWith('video/')) {
+                    previewVideo.src = e.target.result;
+                    previewVideo.style.display = 'block';
+                    previewImg.style.display = 'none';
+                } else {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    previewVideo.style.display = 'none';
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            // Decide key based on type
+            if (file.type.startsWith('video/')) {
+                formData.append('video', file);
+            } else {
+                formData.append('image', file);
+            }
+            formData.append('camera_id', 'WEB_UPLOAD');
+
+            loading.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/upload/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    document.getElementById('resStatus').innerText = data.status;
+                    document.getElementById('resRisk').innerText = data.risk_level;
+
+                    const grid = document.getElementById('resGrid');
+                    grid.innerHTML = '';
+
+                    if (data.images) {
+                        data.images.forEach(img => {
+                            // Only show if it has detections or is main image
+                            if (img.detected_objects && img.detected_objects.length > 0) {
+                                let detectionsText = img.detected_objects.map(d => d.object_type).join(', ');
+
+                                const div = document.createElement('div');
+                                div.className = 'result-item';
+                                div.innerHTML = `
+                                    <a href="${img.image}" target="_blank"><img src="${img.image}" /></a>
+                                    <div class="result-info">
+                                        Found: ${detectionsText}
+                                    </div>
+                                `;
+                                grid.appendChild(div);
+                            }
+                        });
+                    }
+
+                    if (grid.children.length === 0) {
+                        grid.innerHTML = '<p>No hazards detected.</p>';
+                    }
+
+                    resultArea.style.display = 'block';
+                } else {
+                    alert('Analysis failed. Check console.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Connection error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>
