@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVMS | {% block title %}Dashboard{% endblock %}</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 20%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-right: var(--glass-border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 3rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
+        .main-content {
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        /* Common Utility Classes */
+        .card {
+            background: var(--card-bg);
+            border: var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Block for extra page-specific styles */
+            {
+            % block extra_css %
+        }
+
+            {
+            % endblock %
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">RVMS</div>
+            <a href="{% url 'dashboard_index' %}"
+                class="nav-item {% if request.resolver_match.url_name == 'dashboard_index' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'upload_inspection' %}"
+                class="nav-item {% if request.resolver_match.url_name == 'upload_inspection' %}active{% endif %}">New
+                Inspection</a>
+            <a href="{% url 'inspection_list' %}"
+                class="nav-item {% if 'inspection' in request.resolver_match.url_name and request.resolver_match.url_name != 'upload_inspection' %}active{% endif %}">Inspections</a>
+            <a href="{% url 'reports_page' %}"
+                class="nav-item {% if request.resolver_match.url_name == 'reports_page' %}active{% endif %}">Reports</a>
+            <a href="/admin" class="nav-item">Settings</a>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

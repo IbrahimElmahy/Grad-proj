@@ -1,343 +1,387 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'dashboard/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RVMS | New Inspection</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+{% block title %}New Inspection{% endblock %}
 
-        body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 20%);
-            color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
-        }
+{% block extra_css %}
+<style>
+    .card {
+        max-width: 800px;
+        margin: 0 auto;
+    }
 
-        .container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            height: 100%;
-        }
+    h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-        .sidebar {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-right: var(--glass-border);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-        }
+    /* Upload Zone */
+    .file-upload-wrapper {
+        border: 2px dashed var(--accent-blue);
+        display: block;
+        border-radius: 1rem;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 2rem;
+        position: relative;
+        background: rgba(59, 130, 246, 0.1);
+    }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-            margin-bottom: 3rem;
-        }
+    .file-upload-wrapper:hover {
+        background: rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+    }
 
-        .nav-item {
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: block;
-        }
+    #imageInput {
+        display: none;
+    }
 
-        .nav-item:hover,
-        .nav-item.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-        }
+    #preview-container {
+        display: none;
+        margin-top: 1rem;
+    }
 
-        .main-content {
-            padding: 2rem;
-            overflow-y: auto;
-        }
+    #preview-img,
+    #preview-video {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 0.5rem;
+        display: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
 
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: var(--glass-border);
-            border-radius: 1rem;
-            padding: 2rem;
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    .btn-remove {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--accent-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: all 0.2s;
+    }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    .btn-remove:hover {
+        background: rgba(239, 68, 68, 0.3);
+    }
 
-        .file-upload-wrapper {
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            display: block;
-            /* Important: label is inline by default */
-            border-radius: 1rem;
-            padding: 3rem;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s;
-            margin-bottom: 2rem;
-            position: relative;
-        }
+    .btn-upload {
+        background: var(--accent-blue);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: opacity 0.2s;
+    }
 
-        .file-upload-wrapper:hover {
-            border-color: var(--accent-blue);
-        }
+    .btn-upload:hover {
+        opacity: 0.9;
+    }
 
-        #imageInput {
-            display: none;
-        }
+    .loading {
+        display: none;
+        text-align: center;
+        margin-top: 2rem;
+        color: var(--accent-blue);
+    }
 
-        #preview-container {
-            display: none;
-            margin-top: 1rem;
-        }
+    /* Results Section */
+    #resultArea {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 2rem;
+        margin-top: 2rem;
+    }
 
-        #preview-img,
-        #preview-video {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 0.5rem;
-            display: none;
-        }
+    .status-row {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        justify-content: center;
+    }
 
-        .btn-remove {
-            background: var(--accent-red);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
+    .status-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-        .btn-upload {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
+    .status-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
 
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 1rem;
-            color: var(--accent-blue);
-        }
+    .badge-lg {
+        padding: 0.5rem 1.5rem;
+        border-radius: 2rem;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
 
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
+    .badge-HIGH {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--accent-red);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
 
-        .result-item {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
+    .badge-MEDIUM {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent-yellow);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
 
-        .result-item img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-        }
+    .badge-LOW {
+        background: rgba(59, 130, 246, 0.2);
+        color: var(--accent-blue);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
 
-        .result-info {
-            padding: 0.5rem;
-            font-size: 0.8rem;
-        }
-    </style>
-</head>
+    .badge-SAFE {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--accent-green);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
 
-<body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="logo">RVMS</div>
-            <a href="{% url 'dashboard_index' %}" class="nav-item">Dashboard</a>
-            <div class="nav-item active">New Inspection</div>
-            <div class="nav-item">Inspections</div>
-            <div class="nav-item">Reports</div>
-        </aside>
+    .results-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
 
-        <main class="main-content">
-            <div class="card">
-                <h1>Analyze Runway</h1>
+    .result-item {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-                <form id="uploadForm">
-                    <label class="file-upload-wrapper" id="dropZone" for="imageInput">
-                        <div id="uploadPrompt">
-                            <p>Click or Drag to Upload</p>
-                            <small>Supports Images (JPG, PNG) and Videos (MP4)</small>
-                        </div>
+    .result-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
 
-                        <div id="preview-container">
-                            <img id="preview-img" />
-                            <video id="preview-video" controls></video>
-                            <button type="button" class="btn-remove" id="removeBtn">Remove</button>
-                        </div>
-                    </label>
-                    <input type="file" id="imageInput" accept="image/*,video/*" required>
+    .result-info {
+        padding: 1rem;
+    }
 
-                    <button type="submit" class="btn-upload">Analyze Now</button>
-                </form>
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
 
-                <div class="loading" id="loading">Processing AI Analysis... <br> This may take a moment for videos.
-                </div>
+    .tag {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-                <div id="resultArea" style="display:none; margin-top:2rem;">
-                    <h3>Analysis Result</h3>
-                    <p><strong>Status:</strong> <span id="resStatus"></span></p>
-                    <p><strong>Risk Level:</strong> <span id="resRisk"></span></p>
+    .tag-confidence {
+        opacity: 0.7;
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
 
-                    <h4>Detected Hazards (Screenshots)</h4>
-                    <div class="results-grid" id="resGrid">
-                        <!-- Items go here -->
-                    </div>
-                </div>
+{% block content %}
+<div class="card">
+    <h1>Analyze Runway</h1>
+
+    <form id="uploadForm">
+        <label class="file-upload-wrapper" id="dropZone" for="imageInput">
+            <div id="uploadPrompt">
+                <p style="font-size: 1.25rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 0.5rem;">Click
+                    or Drag to Upload</p>
+                <small style="color: var(--text-secondary);">Supports Images (JPG, PNG) and Videos (MP4)</small>
             </div>
-        </main>
+
+            <div id="preview-container">
+                <img id="preview-img" />
+                <video id="preview-video" controls></video>
+                <button type="button" class="btn-remove" id="removeBtn">Remove & Select Different File</button>
+            </div>
+        </label>
+        <input type="file" id="imageInput" accept="image/*,video/*" required>
+
+        <button type="submit" class="btn-upload">Analyze Now</button>
+    </form>
+
+    <div class="loading" id="loading">
+        <h3 style="margin: 0; color: var(--accent-blue); margin-bottom: 0.5rem;">Running AI Analysis...</h3>
+        <small style="color: var(--text-secondary);">Please wait while we process the runway data.</small>
     </div>
 
-    <script>
-        const imageInput = document.getElementById('imageInput');
-        const previewContainer = document.getElementById('preview-container');
-        const previewImg = document.getElementById('preview-img');
-        const previewVideo = document.getElementById('preview-video');
-        const uploadPrompt = document.getElementById('uploadPrompt');
-        const removeBtn = document.getElementById('removeBtn');
-        const form = document.getElementById('uploadForm');
-        const loading = document.getElementById('loading');
-        const resultArea = document.getElementById('resultArea');
+    <div id="resultArea" style="display:none;">
+        <div class="status-row">
+            <div class="status-item">
+                <span class="status-label">Status</span>
+                <span id="resStatus" class="badge-lg"></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Overall Risk</span>
+                <span id="resRisk" class="badge-lg"></span>
+            </div>
+        </div>
 
-        imageInput.addEventListener('change', function (e) {
-            handleFile(e.target.files[0]);
-        });
+        <h3 style="text-align: center; margin-bottom: 1rem;">Visual Analysis</h3>
+        <div class="results-grid" id="resGrid">
+            <!-- Items go here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-        removeBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            imageInput.value = '';
-            previewImg.style.display = 'none';
-            previewVideo.style.display = 'none';
-            previewContainer.style.display = 'none';
-            uploadPrompt.style.display = 'block';
-        });
+{% block scripts %}
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+    const previewVideo = document.getElementById('preview-video');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const removeBtn = document.getElementById('removeBtn');
+    const form = document.getElementById('uploadForm');
+    const loading = document.getElementById('loading');
+    const resultArea = document.getElementById('resultArea');
+    const resStatus = document.getElementById('resStatus');
+    const resRisk = document.getElementById('resRisk');
 
-        function handleFile(file) {
-            if (!file) return;
+    imageInput.addEventListener('change', function (e) {
+        handleFile(e.target.files[0]);
+    });
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                uploadPrompt.style.display = 'none';
-                previewContainer.style.display = 'block';
+    removeBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        imageInput.value = '';
+        previewImg.style.display = 'none';
+        previewVideo.style.display = 'none';
+        previewContainer.style.display = 'none';
+        uploadPrompt.style.display = 'block';
+        resultArea.style.display = 'none';
+    });
 
-                if (file.type.startsWith('video/')) {
-                    previewVideo.src = e.target.result;
-                    previewVideo.style.display = 'block';
-                    previewImg.style.display = 'none';
-                } else {
-                    previewImg.src = e.target.result;
-                    previewImg.style.display = 'block';
-                    previewVideo.style.display = 'none';
-                }
-            }
-            reader.readAsDataURL(file);
-        }
+    function handleFile(file) {
+        if (!file) return;
 
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const file = imageInput.files[0];
-            if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            uploadPrompt.style.display = 'none';
+            previewContainer.style.display = 'block';
 
-            const formData = new FormData();
-            // Decide key based on type
             if (file.type.startsWith('video/')) {
-                formData.append('video', file);
+                previewVideo.src = e.target.result;
+                previewVideo.style.display = 'block';
+                previewImg.style.display = 'none';
             } else {
-                formData.append('image', file);
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                previewVideo.style.display = 'none';
             }
-            formData.append('camera_id', 'WEB_UPLOAD');
+        }
+        reader.readAsDataURL(file);
+    }
 
-            loading.style.display = 'block';
-            resultArea.style.display = 'none';
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const file = imageInput.files[0];
+        if (!file) return;
 
-            try {
-                const response = await fetch('/api/upload/', {
-                    method: 'POST',
-                    body: formData
-                });
+        const formData = new FormData();
+        // Decide key based on type
+        if (file.type.startsWith('video/')) {
+            formData.append('video', file);
+        } else {
+            formData.append('image', file);
+        }
+        formData.append('camera_id', 'WEB_UPLOAD');
 
-                if (response.ok) {
-                    const data = await response.json();
+        loading.style.display = 'block';
+        resultArea.style.display = 'none';
 
-                    document.getElementById('resStatus').innerText = data.status;
-                    document.getElementById('resRisk').innerText = data.risk_level;
+        try {
+            const response = await fetch('/api/upload/', {
+                method: 'POST',
+                body: formData
+            });
 
-                    const grid = document.getElementById('resGrid');
-                    grid.innerHTML = '';
+            if (response.ok) {
+                const data = await response.json();
 
-                    if (data.images) {
-                        data.images.forEach(img => {
-                            // Only show if it has detections or is main image
-                            if (img.detected_objects && img.detected_objects.length > 0) {
-                                let detectionsText = img.detected_objects.map(d => d.object_type).join(', ');
+                // Update Status Badge
+                resStatus.innerText = data.status;
+                resStatus.className = 'badge-lg'; // reset
+                // Since status creates classes like badge-ALERT is not defined in simple css, 
+                // we default to badge-LOW style or generic. 
+                // Actually Risk is what usually has colors.
 
-                                const div = document.createElement('div');
-                                div.className = 'result-item';
-                                div.innerHTML = `
-                                    <a href="${img.image}" target="_blank"><img src="${img.image}" /></a>
-                                    <div class="result-info">
-                                        Found: ${detectionsText}
-                                    </div>
-                                `;
-                                grid.appendChild(div);
-                            }
-                        });
-                    }
+                // Update Risk Badge
+                resRisk.innerText = data.risk_level;
+                resRisk.className = `badge-lg badge-${data.risk_level}`;
 
-                    if (grid.children.length === 0) {
-                        grid.innerHTML = '<p>No hazards detected.</p>';
-                    }
+                const grid = document.getElementById('resGrid');
+                grid.innerHTML = '';
 
-                    resultArea.style.display = 'block';
-                } else {
-                    alert('Analysis failed. Check console.');
+                if (data.images) {
+                    data.images.forEach(img => {
+                        // Check for processed image (with bounding boxes)
+                        let displayUrl = img.processed_image ? img.processed_image : img.image;
+
+                        // Create tags HTML
+                        let tagsHtml = '';
+                        if (img.detected_objects && img.detected_objects.length > 0) {
+                            tagsHtml = img.detected_objects.map(d => `
+                                <div class="tag">
+                                    <span>${d.object_type}</span>
+                                    <span class="tag-confidence">${(d.confidence * 100).toFixed(0)}%</span>
+                                </div>
+                            `).join('');
+                        } else {
+                            tagsHtml = '<span style="color: var(--text-secondary); font-size: 0.9rem;">No hazards detected</span>';
+                        }
+
+                        const div = document.createElement('div');
+                        div.className = 'result-item';
+                        div.innerHTML = `
+                            <a href="${displayUrl}" target="_blank"><img src="${displayUrl}" /></a>
+                            <div class="result-info">
+                                <div style="margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;">Detected Objects:</div>
+                                <div class="tags-container">
+                                    ${tagsHtml}
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(div);
+                    });
                 }
-            } catch (error) {
-                console.error(error);
-                alert('Connection error');
-            } finally {
-                loading.style.display = 'none';
-            }
-        });
-    </script>
-</body>
 
-</html>
+                if (grid.children.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No visual data returned.</p>';
+                }
+
+                resultArea.style.display = 'block';
+            } else {
+                alert('Analysis failed. Check console.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Connection error');
+        } finally {
+            loading.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

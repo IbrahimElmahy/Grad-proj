@@ -52,7 +52,8 @@ def process_frame(img, model, class_names, detection_data):
 
 def main():
     # 1. Load Model
-    model_path = "best (1).pt"
+    # Use absolute path to the backend model
+    model_path = r"f:\znu\fourth year\project\grad project\backend\ai_engine\models\best.pt"
     if not os.path.exists(model_path):
         print(f"Error: Model file '{model_path}' not found.")
         return
@@ -64,8 +65,9 @@ def main():
         print(f"Error loading model: {e}")
         return
 
-    # Class names - UPDATED ORDER based on user request
-    class_names = ['Runway', 'vehicle', 'birds', 'undefined', 'aircraft']
+    # Class names - UPDATED to match model metadata
+    # {0: 'Runway', 1: 'aircraft', 2: 'bird', 3: 'vehicle'}
+    class_names = ['Runway', 'aircraft', 'bird', 'vehicle']
 
     # 2. Select File via Dialog
     print("Opening file selection dialog...")
