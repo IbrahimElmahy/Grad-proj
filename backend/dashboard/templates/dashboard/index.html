@@ -1,0 +1,123 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--accent-green);
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--accent-green);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card-title {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .recent-section {
+        background: var(--card-bg);
+        border: var(--glass-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .placeholder-box {
+        height: 200px;
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Overview</h1>
+    <div class="status-badge">
+        <div class="status-dot"></div>
+        {{ status }}
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Total Inspections</div>
+        <p class="card-value">{{ inspections_count }}</p>
+    </div>
+    <div class="card">
+        <div class="card-title">Risks Detected</div>
+        <p class="card-value" style="color: var(--accent-red)">{{ risks_detected }}</p>
+    </div>
+    <div class="card">
+        <div class="card-title">Active AI Models</div>
+        <p class="card-value">1</p>
+    </div>
+</div>
+
+<div class="recent-section">
+    <h2 class="section-title">Runway Status Map</h2>
+    <div class="placeholder-box">
+        Runway Visualization Placeholder (Waiting for Image Data)
+    </div>
+</div>
+{% endblock %}
