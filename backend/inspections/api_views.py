@@ -94,7 +94,27 @@ class UploadInspectionView(APIView):
             
             if detector:
                 try:
-                    img_detections = detector.detect(inspection_image.image.path)
+                    import os
+                    from django.conf import settings
+                    import datetime
+                    
+                    # Prepare path for processed image
+                    today = datetime.date.today()
+                    date_path = today.strftime('%Y/%m/%d')
+                    fname = os.path.basename(inspection_image.image.path)
+                    
+                    # Store in inspections/processed/...
+                    rel_processed_path = f"inspections/processed/{date_path}/{inspection.id}_{fname}"
+                    full_processed_path = os.path.join(settings.MEDIA_ROOT, rel_processed_path)
+                    
+                    # Run detection + Save processed image
+                    img_detections = detector.detect(inspection_image.image.path, output_path=full_processed_path)
+                    
+                    # Update model with processed image path
+                    if os.path.exists(full_processed_path):
+                        inspection_image.processed_image = rel_processed_path
+                        inspection_image.save()
+                    
                     for d in img_detections:
                         d['image_obj'] = inspection_image
                         detections.append(d)
@@ -118,27 +138,28 @@ class UploadInspectionView(APIView):
                 mapped_type = 'OTHER'
                 lbl = obj_type.lower()
                 
-                if 'fod' in lbl or 'undefined' in lbl or 'debris' in lbl:
-                    mapped_type = 'FOD'
-                    severity = RiskLevel.HIGH
-                elif 'bird' in lbl:
+                # Model classes: Runway, aircraft, bird, vehicle
+                if 'bird' in lbl:
                     mapped_type = 'BIRD'
-                    severity = RiskLevel.MEDIUM
-                elif 'aircraft' in lbl or 'airplane' in lbl:
+                    severity = RiskLevel.HIGH # Birds are high risk on runway
+                elif 'aircraft' in lbl:
                     mapped_type = 'AIRCRAFT'
-                    severity = RiskLevel.SAFE # Aircraft on runway are usually safe/normal unless stated otherwise
+                    severity = RiskLevel.SAFE # Normal unless conflict, but marked SAFE for now
                 elif 'vehicle' in lbl:
                     mapped_type = 'VEHICLE'
-                    severity = RiskLevel.LOW
-                elif 'crack' in lbl:
-                    mapped_type = 'CRACK'
-                    severity = RiskLevel.MEDIUM
+                    severity = RiskLevel.MEDIUM # Vehicle on runway is a hazard
+                elif 'runway' in lbl:
+                    mapped_type = 'RUNWAY'
+                    severity = RiskLevel.SAFE
                 else:
                     mapped_type = 'OTHER'
                     severity = RiskLevel.LOW
                     
                 suggestion = ""
-                # Optional: trigger Gemini suggestions here
+                if severity == RiskLevel.HIGH:
+                    suggestion = "Immediate action required: Dispatch bird scaring unit."
+                elif severity == RiskLevel.MEDIUM:
+                    suggestion = "Warning: Check for unauthorized vehicle access."
 
                 DetectedObject.objects.create(
                     image=img_obj,

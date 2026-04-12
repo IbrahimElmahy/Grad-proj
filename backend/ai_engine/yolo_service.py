@@ -15,7 +15,7 @@ class YoloDetector:
             cls._model = YOLO(model_path)
         return cls._model
 
-    def detect(self, image_path):
+    def detect(self, image_path, output_path=None):
         """
         Runs YOLOv8 detection on the image.
         Returns a list of dictionaries with:
@@ -24,11 +24,31 @@ class YoloDetector:
             'confidence': float,
             'bbox': {'x': float, 'y': float, 'w': float, 'h': float} 
         }
+        Optional: saves annotated image to output_path if provided.
         """
         model = self.get_model()
+        import cv2
         
         # Run inference
         results = model(image_path)
+        
+        # Save processed image if requested
+        if output_path and len(results) > 0:
+            try:
+                # Plot results on the image
+                # conf=True, labels=True, boxes=True are default
+                # distinct line width and font size for visibility
+                plotted_img = results[0].plot(conf=True, labels=True, boxes=True, line_width=2, font_size=2)
+                
+                # directory check
+                folder = os.path.dirname(output_path)
+                if not os.path.exists(folder):
+                    os.makedirs(folder)
+                    
+                cv2.imwrite(output_path, plotted_img)
+                print(f"Saved processed image to: {output_path}")
+            except Exception as e:
+                print(f"Error saving processed image: {e}")
         
         detections = []
         for r in results:
@@ -37,14 +57,8 @@ class YoloDetector:
                 cls_id = int(box.cls[0])
                 conf = float(box.conf[0])
                 
-                # Use user's custom class names to match their original script
-                # Original script: ['Runway', 'vehicle', 'birds', 'undefined', 'aircraft']
-                custom_names = ['Runway', 'vehicle', 'birds', 'undefined', 'aircraft']
-                
-                if 0 <= cls_id < len(custom_names):
-                    label = custom_names[cls_id]
-                else:
-                    label = model.names[cls_id] # Fallback
+                # Use model's native class names
+                label = model.names[cls_id]
                     
                 # Extract normalized bounding box (x_center, y_center, width, height)
                 # YOLOv8 box.xywhn gives normalized xywh

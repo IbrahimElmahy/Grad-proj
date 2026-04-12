@@ -15,6 +15,7 @@ class ObjectType(models.TextChoices):
     VEHICLE = 'VEHICLE', 'Vehicle'
     AIRCRAFT = 'AIRCRAFT', 'Aircraft'
     PERSON = 'PERSON', 'Person'
+    RUNWAY = 'RUNWAY', 'Runway'
     OTHER = 'OTHER', 'Other'
 
 class Inspection(models.Model):
@@ -32,7 +33,7 @@ class Inspection(models.Model):
     risk_level = models.CharField(max_length=10, choices=RiskLevel.choices, default=RiskLevel.SAFE)
     
     # New Video Field
-    video = models.FileField(upload_to='inspections/videos/%Y/%m/%d/', null=True, blank=True)
+    video = models.FileField(upload_to='inspections/videos/%Y/%m/%d/', null=True, blank=True, max_length=500)
     
     def __str__(self):
         return f"Inspection {self.id} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
@@ -45,10 +46,10 @@ class InspectionImage(models.Model):
     inspection = models.ForeignKey(Inspection, on_delete=models.CASCADE, related_name='images')
     
     # Original image from the camera
-    image = models.ImageField(upload_to='inspections/raw/%Y/%m/%d/')
+    image = models.ImageField(upload_to='inspections/raw/%Y/%m/%d/', max_length=500)
     
     # Processed image (optional, populated after AI analysis)
-    processed_image = models.ImageField(upload_to='inspections/processed/%Y/%m/%d/', null=True, blank=True)
+    processed_image = models.ImageField(upload_to='inspections/processed/%Y/%m/%d/', null=True, blank=True, max_length=500)
     
     created_at = models.DateTimeField(auto_now_add=True)
 

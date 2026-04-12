@@ -3,3 +3,4 @@ ultralytics
 cvzone
 pandas
 openpyxl
+psycopg2-binary
