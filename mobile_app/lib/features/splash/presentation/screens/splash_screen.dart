@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Auto Navigation
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, kOnboardingScreen);
+      Navigator.pushReplacementNamed(context, kHomeScreen);
     });
   }
 

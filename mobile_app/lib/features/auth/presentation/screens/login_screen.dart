@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: "Log In",
                 onPressed: () {
                   // Handle actual login submission
-                  Navigator.pushNamed(context, kHomeScreen);
+                  Navigator.pushReplacementNamed(context, kHomeScreen);
                 },
               ),
               const SizedBox(height: 16),

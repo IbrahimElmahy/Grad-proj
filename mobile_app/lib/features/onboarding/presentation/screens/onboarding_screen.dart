@@ -66,18 +66,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 });
               },
               itemBuilder: (context, index) {
-                return Image.network(
+                return Image.asset(
                   onboardingData[index]["image"]!,
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey[200],
-                      alignment: Alignment.center,
-                      child: const CircularProgressIndicator(),
-                    );
-                  },
+                  
                 );
               },
             ),
