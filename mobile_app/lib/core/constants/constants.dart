@@ -1,8 +1,14 @@
-final String kOnboardingScreen = "/onboarding";
-final String kWelcomeScreen = "/welcome";
-final String kLoginScreen = "/login";
-final String kForgetPasswordScreen = "/forgot-password";
-final String kEnterCodeScreen = "/enter-code";
-final String kCreatePasswordScreen = "/create-password";
-final String kPasswordChangedScreen = "/password-changed";
-final String kHomeScreen = "/home-screen";
+abstract class AppRoutes {
+  static const String splash = '/splash';
+  static const String onboarding = '/onboarding';
+  static const String welcome = '/welcome';
+  static const String login = '/login';
+  static const String forgotPassword = '/forgot-password';
+  static const String enterCode = '/enter-code';
+  static const String createPassword = '/create-password';
+  static const String passwordChanged = '/password-changed';
+  static const String home = '/home';
+  static const String history = '/history';
+  static const String alerts = '/alerts';
+  static const String settings = '/settings';
+}

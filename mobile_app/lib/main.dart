@@ -8,6 +8,7 @@ import 'package:gradiuationg_project/features/auth/presentation/screens/password
 import 'package:gradiuationg_project/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:gradiuationg_project/features/home/presentation/screens/home_screen.dart';
 import 'package:gradiuationg_project/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
 
 import 'features/auth/presentation/screens/login_screen.dart' show LoginScreen;
@@ -34,17 +35,20 @@ class RVMS extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: "/",
+      initialRoute: AppRoutes.splash,
       routes: {
-        "/": (context) => const SplashScreen(),
-        kOnboardingScreen: (context) => const OnboardingScreen(),
-        kWelcomeScreen: (context) => const WelcomeScreen(),
-        kLoginScreen: (context) => const LoginScreen(),
-        kForgetPasswordScreen: (context) => const ForgotPasswordScreen(),
-        kEnterCodeScreen: (context) => const EnterCodeScreen(),
-        kCreatePasswordScreen: (context) => const CreatePasswordScreen(),
-        kPasswordChangedScreen: (context) => const PasswordChangedScreen(),
-        kHomeScreen: (context) => const HomeScreen(),
+        AppRoutes.splash: (context) => const SplashScreen(),
+        AppRoutes.onboarding: (context) => const OnboardingScreen(),
+        AppRoutes.welcome: (context) => const WelcomeScreen(),
+        AppRoutes.login: (context) => const LoginScreen(),
+        AppRoutes.forgotPassword: (context) => const ForgotPasswordScreen(),
+        AppRoutes.enterCode: (context) => const EnterCodeScreen(),
+        AppRoutes.createPassword: (context) => const CreatePasswordScreen(),
+        AppRoutes.passwordChanged: (context) => const PasswordChangedScreen(),
+        AppRoutes.home: (context) => const HomeScreen(),
+        // AppRoutes.history: (context) => const HistoryScreen(),
+        // AppRoutes.alerts: (context) => const AlertsScreen(),
+        AppRoutes.settings: (context) => const SettingsScreen(),
       },
     );
   }

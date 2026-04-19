@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../../core/widgets/user_welcome_column.dart';
 import '../../../alerts/data/models/alert_model.dart';
 import '../../../alerts/presentation/widgets/alert_card.dart';
-import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/draggable_check_bar.dart';
 import '../widgets/home_stats_section.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
 
   final List<AlertModel> alerts = const [
     AlertModel(
@@ -34,7 +40,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      bottomNavigationBar: const CustomBottomNavBar(),
+      bottomNavigationBar: const CustomBottomNavBar(
+  currentIndex: 0,
+),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -71,7 +79,10 @@ class HomeScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   separatorBuilder: (_, __) => const SizedBox(height: 14),
                   itemBuilder: (context, index) {
-                    return AlertCard(alert: alerts[index], onTap: () {});
+                    return AlertCard(
+                      alert: alerts[index],
+                      onTap: () {},
+                    );
                   },
                 ),
                 const SizedBox(height: 100),
