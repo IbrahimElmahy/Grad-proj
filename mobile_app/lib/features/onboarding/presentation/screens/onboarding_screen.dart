@@ -41,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      Navigator.pushReplacementNamed(context, kWelcomeScreen);
+      Navigator.pushReplacementNamed(context, AppRoutes.welcome);
     }
   }
 
