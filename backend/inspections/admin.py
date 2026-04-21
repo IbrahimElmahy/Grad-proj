@@ -23,5 +23,6 @@ class InspectionImageAdmin(admin.ModelAdmin):
 
 @admin.register(DetectedObject)
 class DetectedObjectAdmin(admin.ModelAdmin):
-    list_display = ('object_type', 'severity', 'confidence', 'image')
+    list_display = ('raw_label', 'object_type', 'severity', 'confidence', 'frame_index', 'image')
     list_filter = ('object_type', 'severity')
+    search_fields = ('raw_label', 'object_type')

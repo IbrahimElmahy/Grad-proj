@@ -2,7 +2,6 @@ from django.core.management.base import BaseCommand
 from inspections.models import Inspection, InspectionImage, DetectedObject, RiskLevel, ObjectType
 from django.utils import timezone
 import random
-import uuid
 from datetime import timedelta
 
 class Command(BaseCommand):
@@ -30,7 +29,8 @@ class Command(BaseCommand):
             inspection = Inspection.objects.create(
                 camera_id=random.choice(cameras),
                 status=status,
-                risk_level=risk
+                risk_level=risk,
+                analysis_log={}
             )
             # Manually set timestamp (auto_now_add prevents this on create usually, so we update)
             inspection.timestamp = timestamp
@@ -49,6 +49,10 @@ class Command(BaseCommand):
                     for k in range(random.randint(1, 3)):
                         obj_type = random.choice(ObjectType.choices)[0]
                         confidence = random.uniform(0.75, 0.99)
+                        bbox_x = random.randint(40, 640)
+                        bbox_y = random.randint(40, 360)
+                        bbox_w = random.randint(30, 140)
+                        bbox_h = random.randint(30, 140)
                         
                         suggestion = ""
                         if obj_type == 'FOD':
@@ -60,10 +64,20 @@ class Command(BaseCommand):
                             
                         DetectedObject.objects.create(
                             image=img,
+                            raw_label=obj_type,
                             object_type=obj_type,
                             confidence=confidence,
                             severity=risk,
-                            bbox_data={'x': random.uniform(0.1, 0.9), 'y': random.uniform(0.1, 0.9), 'w': 0.1, 'h': 0.1},
+                            detected_at=timestamp,
+                            bbox_x=bbox_x,
+                            bbox_y=bbox_y,
+                            bbox_w=bbox_w,
+                            bbox_h=bbox_h,
+                            bbox_x1=bbox_x,
+                            bbox_y1=bbox_y,
+                            bbox_x2=bbox_x + bbox_w,
+                            bbox_y2=bbox_y + bbox_h,
+                            bbox_data={'x': bbox_x, 'y': bbox_y, 'w': bbox_w, 'h': bbox_h, 'x1': bbox_x, 'y1': bbox_y, 'x2': bbox_x + bbox_w, 'y2': bbox_y + bbox_h},
                             gemini_suggestion=suggestion
                         )
 

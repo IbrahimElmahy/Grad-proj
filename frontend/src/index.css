@@ -1,0 +1,45 @@
+:root {
+  --ink: #112031;
+  --muted: #5e7084;
+  --bg: #eef4f8;
+  --ok: #167a47;
+  --danger: #c52f2f;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(65, 141, 255, 0.1), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(9, 158, 123, 0.1), transparent 22%),
+    linear-gradient(180deg, #edf4f8 0%, #f8fbfd 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+code {
+  font-family: "Cascadia Code", Consolas, monospace;
+  background: rgba(16, 32, 49, 0.08);
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+#root {
+  min-height: 100vh;
+}

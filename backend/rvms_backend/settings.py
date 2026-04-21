@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third party
+    'channels',
     'rest_framework',
     'drf_spectacular',
     # Local
@@ -59,6 +60,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'rvms_backend.urls'
+ASGI_APPLICATION = 'rvms_backend.asgi.application'
 
 TEMPLATES = [
     {
@@ -76,6 +78,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rvms_backend.wsgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 
 # Database
@@ -146,3 +154,5 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
