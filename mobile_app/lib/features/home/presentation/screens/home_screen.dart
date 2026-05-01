@@ -16,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final List<AlertModel> alerts = const [
     AlertModel(
       runwayTitle: 'RWY 30R',
@@ -40,24 +39,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      bottomNavigationBar: const CustomBottomNavBar(
-  currentIndex: 0,
-),
+      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
             child: Column(
               children: [
                 const SizedBox(height: 12),
                 const Row(
                   children: [
-                    UserAvatar(imagePath: 'assets/images/user_image.jpg'),
+                    UserAvatar(imagePath: 'assets/images/user_image.jpg'), //
                     SizedBox(width: 10),
                     Expanded(
                       child: UserWelcomeColumn(
-                        userName: 'Ali',
-                        userRole: 'Safety Officer',
+                        userName: 'Ali', //
+                        userRole: 'Safety Officer', //
                       ),
                     ),
                   ],
@@ -77,15 +75,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: alerts.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  separatorBuilder: (context, i) => const SizedBox(height: 14),
                   itemBuilder: (context, index) {
                     return AlertCard(
                       alert: alerts[index],
-                      onTap: () {},
+                      onTap: () {
+                        //
+                      },
                     );
                   },
                 ),
-                const SizedBox(height: 100),
+                const SizedBox(height: 50),
               ],
             ),
           ),

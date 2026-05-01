@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/create_password_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/enter_code_screen.dart';
@@ -10,7 +9,6 @@ import 'package:gradiuationg_project/features/home/presentation/screens/home_scr
 import 'package:gradiuationg_project/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
-
 import 'features/auth/presentation/screens/login_screen.dart' show LoginScreen;
 
 void main() {
@@ -25,10 +23,10 @@ class RVMS extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        primaryTextTheme: GoogleFonts.poppinsTextTheme(),
+        textTheme: ThemeData.light().textTheme,
+        primaryTextTheme: ThemeData.light().textTheme,
         appBarTheme: AppBarTheme(
-          titleTextStyle: GoogleFonts.poppins(
+          titleTextStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.white,

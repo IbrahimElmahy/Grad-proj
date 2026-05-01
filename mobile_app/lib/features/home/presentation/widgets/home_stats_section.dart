@@ -11,7 +11,7 @@ class HomeStatsSection extends StatelessWidget {
         Expanded(
           child: HomeStatCard(
             title: "Today's Checks",
-            value: '3',
+            value: '3', //
             icon: Icons.fact_check_outlined,
           ),
         ),
@@ -19,7 +19,7 @@ class HomeStatsSection extends StatelessWidget {
         Expanded(
           child: HomeStatCard(
             title: 'Last status',
-            value: 'Safe',
+            value: 'Safe', //
             icon: Icons.hub_outlined,
           ),
         ),
@@ -27,7 +27,7 @@ class HomeStatsSection extends StatelessWidget {
         Expanded(
           child: HomeStatCard(
             title: 'Next Check',
-            value: 'Today 05:45 pm',
+            value: 'Today 05:45 pm', //
             icon: Icons.copy_all_outlined,
           ),
         ),
