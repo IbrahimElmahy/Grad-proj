@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runway Alert WebSocket Test</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #102033;
+      --muted: #5b6b7d;
+      --accent: #0b6efd;
+      --danger: #cf2e2e;
+      --ok: #17844b;
+      --border: #d8e0ea;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: linear-gradient(180deg, #eef4fb 0%, #f8fbfe 100%);
+      color: var(--ink);
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(16, 32, 51, 0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    input, button {
+      font: inherit;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+    }
+
+    input {
+      flex: 1 1 440px;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover {
+      filter: brightness(0.95);
+    }
+
+    .status {
+      margin: 12px 0 18px;
+      font-weight: 600;
+    }
+
+    .status.connected {
+      color: var(--ok);
+    }
+
+    .status.disconnected {
+      color: var(--danger);
+    }
+
+    pre {
+      background: #0f1720;
+      color: #d7e2f0;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 280px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hint {
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Runway Alerts Live Test</h1>
+      <div class="hint">
+        Connect this page to the Django Channels endpoint and watch incoming JSON alerts appear live.
+      </div>
+
+      <div class="row">
+        <input id="wsUrl" value="ws://127.0.0.1:8000/ws/alerts/" />
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn">Disconnect</button>
+      </div>
+
+      <div id="status" class="status disconnected">Status: Disconnected</div>
+      <pre id="log">Waiting for alerts...</pre>
+    </div>
+  </div>
+
+  <script>
+    const wsUrlInput = document.getElementById("wsUrl");
+    const connectBtn = document.getElementById("connectBtn");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+    const statusEl = document.getElementById("status");
+    const logEl = document.getElementById("log");
+
+    let socket = null;
+
+    function setStatus(text, connected) {
+      statusEl.textContent = text;
+      statusEl.className = connected ? "status connected" : "status disconnected";
+    }
+
+    function appendLog(payload) {
+      const stamp = new Date().toLocaleTimeString();
+      const block = `[${stamp}]\n${JSON.stringify(payload, null, 2)}\n\n`;
+      logEl.textContent = block + logEl.textContent;
+    }
+
+    function connect() {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        appendLog({ info: "WebSocket is already connected." });
+        return;
+      }
+
+      socket = new WebSocket(wsUrlInput.value);
+
+      socket.onopen = () => {
+        setStatus("Status: Connected", true);
+        appendLog({ info: "Connected to WebSocket server." });
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          appendLog(JSON.parse(event.data));
+        } catch (error) {
+          appendLog({ raw: event.data, parse_error: String(error) });
+        }
+      };
+
+      socket.onerror = () => {
+        appendLog({ error: "WebSocket connection error." });
+      };
+
+      socket.onclose = (event) => {
+        setStatus(`Status: Disconnected (code ${event.code})`, false);
+        appendLog({ info: "WebSocket disconnected.", code: event.code, reason: event.reason });
+      };
+    }
+
+    function disconnect() {
+      if (socket) {
+        socket.close();
+      }
+    }
+
+    connectBtn.addEventListener("click", connect);
+    disconnectBtn.addEventListener("click", disconnect);
+  </script>
+</body>
+</html>

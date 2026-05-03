@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # home_view removed to allow dashboard to take over root
     path('', include('dashboard.urls')),
+    path('', include('core.urls')),
     path('', include('inspections.urls')), # API Routes
     path('', include('reports.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

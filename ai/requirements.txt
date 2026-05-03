@@ -4,3 +4,8 @@ cvzone
 pandas
 openpyxl
 psycopg2-binary
+PyYAML
+albumentations
+kaggle
+roboflow
+channels
