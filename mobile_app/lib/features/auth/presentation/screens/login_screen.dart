@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
+import 'package:gradiuationg_project/core/constants/user_roles.dart';
+import 'package:gradiuationg_project/core/models/user_model.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
 
@@ -104,6 +106,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: "Log In",
                 onPressed: () {
                   // Handle actual login submission
+                  final UserModel user = UserModel(
+  name: 'Ali',
+  role: UserRole.manager,
+);
+
+if (user.role == UserRole.manager) {
+  Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+} else {
+  Navigator.pushReplacementNamed(context, AppRoutes.home);
+}
                   Navigator.pushReplacementNamed(context, AppRoutes.home);
                 },
               ),

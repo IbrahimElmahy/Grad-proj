@@ -5,7 +5,9 @@ import 'package:gradiuationg_project/features/auth/presentation/screens/enter_co
 import 'package:gradiuationg_project/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/password_changed_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:gradiuationg_project/features/history/presentation/screens/retprt_hub_screen.dart';
 import 'package:gradiuationg_project/features/home/presentation/screens/home_screen.dart';
+import 'package:gradiuationg_project/features/home/presentation/screens/manager_home_screen.dart';
 import 'package:gradiuationg_project/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
@@ -33,7 +35,7 @@ class RVMS extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: AppRoutes.splash,
+      initialRoute: AppRoutes.managerHomeScreen,
       routes: {
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.onboarding: (context) => const OnboardingScreen(),
@@ -47,6 +49,8 @@ class RVMS extends StatelessWidget {
         // AppRoutes.history: (context) => const HistoryScreen(),
         // AppRoutes.alerts: (context) => const AlertsScreen(),
         AppRoutes.settings: (context) => const SettingsScreen(),
+        AppRoutes.managerHomeScreen: (context) => const ManagerHomeScreen(),
+        AppRoutes.reportHupScreen: (context) => const ReportHubScreen(),
       },
     );
   }

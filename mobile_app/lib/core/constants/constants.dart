@@ -11,4 +11,6 @@ abstract class AppRoutes {
   static const String history = '/history';
   static const String alerts = '/alerts';
   static const String settings = '/settings';
+  static const String managerHomeScreen = "/manager-home-screen";
+  static const String reportHupScreen = "/report-hup-screen";
 }

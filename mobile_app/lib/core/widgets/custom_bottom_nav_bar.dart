@@ -12,11 +12,11 @@ class CustomBottomNavBar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
         break;
-      // case 1:
-      //   Navigator.pushReplacementNamed(context, AppRoutes.history);
-      //   break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.reportHupScreen);
+        break;
       // case 2:
       //   Navigator.pushReplacementNamed(context, AppRoutes.alerts);
       //   break;
@@ -28,7 +28,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<IconData> items = const[
+    final List<IconData> items = const [
       Icons.home_filled,
       Icons.history,
       Icons.warning_amber_rounded,
