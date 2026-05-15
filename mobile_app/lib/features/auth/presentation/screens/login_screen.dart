@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/constants/user_roles.dart';
-import 'package:gradiuationg_project/core/models/user_model.dart';
+
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
 import '../../data/auth_service.dart';
@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await _authService.login(email: email, password: password);
       if (!mounted) return;
       final user = AuthSession.user;
-      if (user?.role == UserRole.manager) {
+      if (user?.role.toLowerCase() == UserRole.manager.name) {
         Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
       } else {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
