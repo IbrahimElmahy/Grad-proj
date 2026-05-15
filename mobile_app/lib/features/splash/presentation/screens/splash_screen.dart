@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
+import 'package:gradiuationg_project/features/auth/data/auth_session.dart';
 import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
@@ -36,9 +37,13 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Auto Navigation
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      if (!mounted) return;
+
+      Navigator.pushReplacementNamed(
+        context,
+        AuthSession.isSignedIn ? AppRoutes.home : AppRoutes.welcome,
+      );
     });
   }
 

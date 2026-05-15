@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
+import '../../data/auth_service.dart';
 
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -13,11 +14,46 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
+  final AuthService _authService = const AuthService();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _requestReset() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showMessage('Please enter your email address.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final request = await _authService.forgotPassword(email);
+      if (!mounted) return;
+      Navigator.pushNamed(
+        context,
+        "/enter-code",
+        arguments: {
+          'email': request.email,
+          'token': request.token,
+        },
+      );
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -100,9 +136,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               // Reset Password Button
               PrimaryButton(
                 text: "Reset Password",
-                onPressed: () {
-                  Navigator.pushNamed(context, "/enter-code");
-                },
+                isLoading: _isLoading,
+                onPressed: _requestReset,
               ),
             ],
           ),

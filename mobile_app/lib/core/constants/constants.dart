@@ -10,5 +10,10 @@ abstract class AppRoutes {
   static const String home = '/home';
   static const String history = '/history';
   static const String alerts = '/alerts';
+  static const String inspectionDetail = '/inspection-detail';
   static const String settings = '/settings';
+  static const String accountInfo = '/settings/account';
+  static const String notifications = '/settings/notifications';
+  static const String privacy = '/settings/privacy';
+  static const String about = '/settings/about';
 }

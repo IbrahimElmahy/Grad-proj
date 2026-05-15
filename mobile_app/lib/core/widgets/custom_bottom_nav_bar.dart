@@ -17,12 +17,12 @@ class CustomBottomNavBar extends StatelessWidget {
       case 0:
         Navigator.pushReplacementNamed(context, AppRoutes.home);
         break;
-      // case 1:
-      //   Navigator.pushReplacementNamed(context, AppRoutes.history);
-      //   break;
-      // case 2:
-      //   Navigator.pushReplacementNamed(context, AppRoutes.alerts);
-      //   break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.history);
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, AppRoutes.alerts);
+        break;
       case 3:
         Navigator.pushReplacementNamed(context, AppRoutes.settings);
         break;

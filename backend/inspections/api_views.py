@@ -9,8 +9,6 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ai_engine.gemini_service import GeminiAdvisor
-from ai_engine.yolo_service import YoloDetector
 from .hazard_utils import (
     build_analysis_log,
     build_detection_log_entry,
@@ -23,6 +21,27 @@ from .hazard_utils import (
 from .models import DetectedObject, Inspection, InspectionImage, RiskLevel
 from .realtime import broadcast_inspection_alert
 from .serializers import InspectionSerializer
+
+GeminiAdvisor = None
+YoloDetector = None
+
+
+def _get_gemini_advisor_class():
+    global GeminiAdvisor
+    if GeminiAdvisor is None:
+        from ai_engine.gemini_service import GeminiAdvisor as ImportedGeminiAdvisor
+
+        GeminiAdvisor = ImportedGeminiAdvisor
+    return GeminiAdvisor
+
+
+def _get_yolo_detector_class():
+    global YoloDetector
+    if YoloDetector is None:
+        from ai_engine.yolo_service import YoloDetector as ImportedYoloDetector
+
+        YoloDetector = ImportedYoloDetector
+    return YoloDetector
 
 
 def _coerce_int(value):
@@ -95,7 +114,7 @@ class UploadInspectionView(APIView):
         detections = []
 
         try:
-            detector = YoloDetector()
+            detector = _get_yolo_detector_class()()
         except Exception as exc:
             detector_error = str(exc)
             print(f"Failed to load YOLO model: {exc}")
@@ -159,7 +178,7 @@ class UploadInspectionView(APIView):
                     detector_error = str(exc)
                     print(f"Image detection failed: {exc}")
 
-        advisor = GeminiAdvisor() if detections else None
+        advisor = _get_gemini_advisor_class()() if detections else None
         saved_detection_logs = []
         highest_severity = RiskLevel.SAFE
 

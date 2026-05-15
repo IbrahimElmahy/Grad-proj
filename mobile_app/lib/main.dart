@@ -6,8 +6,14 @@ import 'package:gradiuationg_project/features/auth/presentation/screens/enter_co
 import 'package:gradiuationg_project/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/password_changed_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:gradiuationg_project/features/alerts/presentation/screens/alerts_screen.dart';
+import 'package:gradiuationg_project/features/history/presentation/screens/history_screen.dart';
 import 'package:gradiuationg_project/features/home/presentation/screens/home_screen.dart';
+import 'package:gradiuationg_project/features/inspections/presentation/screens/inspection_detail_screen.dart';
 import 'package:gradiuationg_project/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/account_info_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/notifications_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/privacy_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
 
@@ -46,9 +52,14 @@ class RVMS extends StatelessWidget {
         AppRoutes.createPassword: (context) => const CreatePasswordScreen(),
         AppRoutes.passwordChanged: (context) => const PasswordChangedScreen(),
         AppRoutes.home: (context) => const HomeScreen(),
-        // AppRoutes.history: (context) => const HistoryScreen(),
-        // AppRoutes.alerts: (context) => const AlertsScreen(),
+        AppRoutes.history: (context) => const HistoryScreen(),
+        AppRoutes.alerts: (context) => const AlertsScreen(),
+        AppRoutes.inspectionDetail: (context) => const InspectionDetailScreen(),
         AppRoutes.settings: (context) => const SettingsScreen(),
+        AppRoutes.accountInfo: (context) => const AccountInfoScreen(),
+        AppRoutes.notifications: (context) => const NotificationsScreen(),
+        AppRoutes.privacy: (context) => const PrivacyScreen(),
+        AppRoutes.about: (context) => const AboutScreen(),
       },
     );
   }

@@ -1,9 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
+import 'package:gradiuationg_project/features/auth/data/auth_service.dart';
 
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final AuthService _authService = const AuthService();
+  bool _isDemoLoading = false;
+
+  Future<void> _continueWithDemo() async {
+    setState(() => _isDemoLoading = true);
+    try {
+      await _authService.login(email: 'officer@rvms.com', password: 'officer123');
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _isDemoLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +85,7 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               OutlinedButton(
-                onPressed: () {
-                  // Demo account action
-                },
+                onPressed: _isDemoLoading ? null : _continueWithDemo,
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF1B233A),
                   minimumSize: const Size(double.infinity, 56),
@@ -73,13 +96,19 @@ class WelcomeScreen extends StatelessWidget {
                     ), // Pill-shaped button
                   ),
                 ),
-                child: const Text(
-                  "Continue With Demo Account",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
+                child: _isDemoLoading
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        "Continue With Demo Account",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
               ),
 
-              Spacer(flex: 3), // Bottom padding
+              const Spacer(flex: 3),
             ],
           ),
         ),

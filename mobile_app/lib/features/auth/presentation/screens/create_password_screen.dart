@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
+import '../../data/auth_service.dart';
 
 
 class CreatePasswordScreen extends StatefulWidget {
@@ -13,15 +14,70 @@ class CreatePasswordScreen extends StatefulWidget {
 class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final AuthService _authService = const AuthService();
   
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
+  String _token = '';
+  bool _loadedArgs = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loadedArgs) return;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _token = args['token'] as String? ?? '';
+    }
+    _loadedArgs = true;
+  }
 
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _updatePassword() async {
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (_token.isEmpty) {
+      _showMessage('Reset token is missing. Please request a new reset link.');
+      return;
+    }
+    if (password.length < 12) {
+      _showMessage('Password must be at least 12 characters.');
+      return;
+    }
+    if (password != confirmPassword) {
+      _showMessage('Passwords do not match.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await _authService.resetPassword(
+        token: _token,
+        password: password,
+        passwordConfirm: confirmPassword,
+      );
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, "/password-changed", (route) => false);
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -109,10 +165,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
               // Update Password Button
               PrimaryButton(
                 text: "Update Password",
-                onPressed: () {
-                  // Final submission logic, then navigate to success screen
-                  Navigator.pushNamedAndRemoveUntil(context, "/password-changed", (route) => false);
-                },
+                isLoading: _isLoading,
+                onPressed: _updatePassword,
               ),
             ],
           ),

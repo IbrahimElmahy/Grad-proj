@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
 
 
@@ -12,30 +12,47 @@ class EnterCodeScreen extends StatefulWidget {
 }
 
 class _EnterCodeScreenState extends State<EnterCodeScreen> {
-  final List<TextEditingController> _controllers = List.generate(
-    4,
-    (_) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  final TextEditingController _tokenController = TextEditingController();
+  String _email = '';
+  String _backendToken = '';
+  bool _loadedArgs = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loadedArgs) return;
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _email = args['email'] as String? ?? '';
+      _backendToken = args['token'] as String? ?? '';
+      _tokenController.text = _backendToken;
+    }
+    _loadedArgs = true;
+  }
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
+    _tokenController.dispose();
     super.dispose();
   }
 
-  void _onPinChanged(String value, int index) {
-    if (value.length == 1 && index < 3) {
-      _focusNodes[index + 1].requestFocus();
+  void _continue() {
+    final token = _tokenController.text.trim();
+    if (token.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the reset token.')),
+      );
+      return;
     }
-    if (value.isEmpty && index > 0) {
-      _focusNodes[index - 1].requestFocus();
-    }
+
+    Navigator.pushNamed(
+      context,
+      "/create-password",
+      arguments: {
+        'email': _email,
+        'token': token,
+      },
+    );
   }
 
   @override
@@ -67,7 +84,7 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                "Your temporary login code was sent to\neman22@gmail.com",
+                "Enter the reset token generated for your account.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -76,67 +93,43 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
                   height: 1.5,
                 ),
               ),
-              const SizedBox(height: 48),
-
-              // OTP Fields
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  4,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                    width: 56,
-                    height: 56,
-                    child: TextField(
-                      controller: _controllers[index],
-                      focusNode: _focusNodes[index],
-                      onChanged: (value) => _onPinChanged(value, index),
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(1),
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.zero,
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF1D55E5),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    ),
+              if (_email.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _email,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1D55E5),
                   ),
                 ),
+              ],
+              const SizedBox(height: 48),
+
+              CustomTextField(
+                controller: _tokenController,
+                hintText: "Reset Token",
+                prefixIcon: Icons.key_outlined,
               ),
+              if (_backendToken.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                const Text(
+                  "Demo backend returns the token directly until email/SMS delivery is added.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF6C757D),
+                    height: 1.4,
+                  ),
+                ),
+              ],
               const SizedBox(height: 48),
 
               // Verify Button
               PrimaryButton(
                 text: "Verify code",
-                onPressed: () {
-                  Navigator.pushNamed(context, "/create-password");
-                },
+                onPressed: _continue,
               ),
               const SizedBox(height: 24),
 
@@ -159,7 +152,7 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // Resend code logic
+                            Navigator.pop(context);
                           },
                       ),
                     ],

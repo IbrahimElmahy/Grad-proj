@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
+import '../../data/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,14 +14,46 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
+  final AuthService _authService = const AuthService();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showMessage('Please enter your email and password.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await _authService.login(email: email, password: password);
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -73,6 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: "Email Address",
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) => _passwordFocusNode.requestFocus(),
               ),
               const SizedBox(height: 16),
 
@@ -82,6 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: "Password",
                 prefixIcon: Icons.lock_outline,
                 obscureText: _obscurePassword,
+                focusNode: _passwordFocusNode,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _submit(),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword
@@ -102,10 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
               // Login Button
               PrimaryButton(
                 text: "Log In",
-                onPressed: () {
-                  // Handle actual login submission
-                  Navigator.pushReplacementNamed(context, AppRoutes.home);
-                },
+                isLoading: _isLoading,
+                onPressed: _submit,
               ),
               const SizedBox(height: 16),
 

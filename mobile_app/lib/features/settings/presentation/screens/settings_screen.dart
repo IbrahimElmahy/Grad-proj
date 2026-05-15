@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/data/auth_session.dart';
 import '../widgets/logout_tile.dart';
 import '../widgets/settings_item.dart';
 
@@ -44,32 +46,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SettingsItem(
                       icon: Icons.info,
                       title: 'Account Info',
-                      onTap: () {},
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.accountInfo),
                     ),
                     SettingsItem(
                       icon: Icons.key,
                       title: 'Change Password',
-                      onTap: () {},
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
                     ),
                     SettingsItem(
                       icon: Icons.shield,
                       title: 'Privacy& Policy',
-                      onTap: () {},
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.privacy),
                     ),
                     SettingsItem(
                       icon: Icons.notifications,
                       title: 'Notifications',
                       trailingText: 'Enabled',
-                      onTap: () {},
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
                     ),
                     SettingsItem(
                       title: 'About',
                       smallLeadingText: 'about.me',
-                      onTap: () {},
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.about),
                     ),
                     const SizedBox(height: 22),
                     LogoutTile(
-                      onTap: () {},
+                      onTap: () {
+                        AuthSession.clear();
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          AppRoutes.login,
+                          (route) => false,
+                        );
+                      },
                     ),
                   ],
                 ),
