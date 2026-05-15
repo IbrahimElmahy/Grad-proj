@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
+import 'package:gradiuationg_project/core/constants/user_roles.dart';
+import 'package:gradiuationg_project/core/models/user_model.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
 import '../../data/auth_service.dart';
@@ -141,7 +143,11 @@ class _LoginScreenState extends State<LoginScreen> {
               PrimaryButton(
                 text: "Log In",
                 isLoading: _isLoading,
-                onPressed: _submit,
+                onPressed: () async {
+                  await _submit();
+                  // Role-based navigation is already handled inside _submit or can be added there.
+                  // For now, let's ensure _submit is called.
+                },
               ),
               const SizedBox(height: 16),
 

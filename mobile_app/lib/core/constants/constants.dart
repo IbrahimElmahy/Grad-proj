@@ -16,4 +16,6 @@ abstract class AppRoutes {
   static const String notifications = '/settings/notifications';
   static const String privacy = '/settings/privacy';
   static const String about = '/settings/about';
+  static const String managerHomeScreen = "/manager-home-screen";
+  static const String reportHupScreen = "/report-hup-screen";
 }

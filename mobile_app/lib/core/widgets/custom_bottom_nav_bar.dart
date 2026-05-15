@@ -5,17 +5,14 @@ import '../../../../core/theme/app_colors.dart';
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
 
-  const CustomBottomNavBar({
-    super.key,
-    required this.currentIndex,
-  });
+  const CustomBottomNavBar({super.key, required this.currentIndex});
 
   void _navigate(BuildContext context, int index) {
     if (index == currentIndex) return;
 
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
         break;
       case 1:
         Navigator.pushReplacementNamed(context, AppRoutes.history);
@@ -31,7 +28,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
+    final List<IconData> items = const [
       Icons.home_filled,
       Icons.history,
       Icons.warning_amber_rounded,

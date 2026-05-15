@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/create_password_screen.dart';
 import 'package:gradiuationg_project/features/auth/presentation/screens/enter_code_screen.dart';
@@ -8,7 +7,9 @@ import 'package:gradiuationg_project/features/auth/presentation/screens/password
 import 'package:gradiuationg_project/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:gradiuationg_project/features/alerts/presentation/screens/alerts_screen.dart';
 import 'package:gradiuationg_project/features/history/presentation/screens/history_screen.dart';
+import 'package:gradiuationg_project/features/history/presentation/screens/report_hub_screen.dart';
 import 'package:gradiuationg_project/features/home/presentation/screens/home_screen.dart';
+import 'package:gradiuationg_project/features/home/presentation/screens/manager_home_screen.dart';
 import 'package:gradiuationg_project/features/inspections/presentation/screens/inspection_detail_screen.dart';
 import 'package:gradiuationg_project/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/account_info_screen.dart';
@@ -16,7 +17,6 @@ import 'package:gradiuationg_project/features/settings/presentation/screens/noti
 import 'package:gradiuationg_project/features/settings/presentation/screens/privacy_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
-
 import 'features/auth/presentation/screens/login_screen.dart' show LoginScreen;
 
 void main() {
@@ -31,17 +31,17 @@ class RVMS extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        primaryTextTheme: GoogleFonts.poppinsTextTheme(),
+        textTheme: ThemeData.light().textTheme,
+        primaryTextTheme: ThemeData.light().textTheme,
         appBarTheme: AppBarTheme(
-          titleTextStyle: GoogleFonts.poppins(
+          titleTextStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
       ),
-      initialRoute: AppRoutes.splash,
+      initialRoute: AppRoutes.managerHomeScreen,
       routes: {
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.onboarding: (context) => const OnboardingScreen(),
@@ -59,7 +59,8 @@ class RVMS extends StatelessWidget {
         AppRoutes.accountInfo: (context) => const AccountInfoScreen(),
         AppRoutes.notifications: (context) => const NotificationsScreen(),
         AppRoutes.privacy: (context) => const PrivacyScreen(),
-        AppRoutes.about: (context) => const AboutScreen(),
+        AppRoutes.managerHomeScreen: (context) => const ManagerHomeScreen(),
+        AppRoutes.reportHupScreen: (context) => const ReportHubScreen(),
       },
     );
   }
