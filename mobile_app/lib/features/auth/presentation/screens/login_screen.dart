@@ -5,6 +5,7 @@ import 'package:gradiuationg_project/core/models/user_model.dart';
 import 'package:gradiuationg_project/core/widgets/custom_text_field.dart';
 import 'package:gradiuationg_project/core/widgets/primary_button.dart';
 import '../../data/auth_service.dart';
+import '../../data/auth_session.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,7 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _authService.login(email: email, password: password);
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      final user = AuthSession.user;
+      if (user?.role == UserRole.manager) {
+        Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      }
     } catch (error) {
       if (!mounted) return;
       _showMessage(error.toString());
