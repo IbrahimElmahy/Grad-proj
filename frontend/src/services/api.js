@@ -331,6 +331,25 @@ export const authService = {
 
     return response
   },
+
+  changePassword: async ({
+    email,
+    current_password,
+    new_password,
+    confirm_new_password,
+  }) => {
+    const response = await api.post(
+      '/auth/change-password/',
+      {
+        email,
+        current_password,
+        new_password,
+        confirm_new_password,
+      }
+    )
+
+    return response
+  },
 }
 
 export const inspectionService = {

@@ -1,87 +1,83 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useAuthStore } from "../store/authStore";
+import { authService } from "../services/api";
 
 export default function Settings() {
   // =========================
-  // States
+  // Auth Store & States
   // =========================
 
-  const [criticalAlerts, setCriticalAlerts] =
-    useState(true);
+  const user = useAuthStore((state) => state.user);
+  const login = useAuthStore((state) => state.login);
+  const token = useAuthStore((state) => state.token);
 
-  const [weeklyReports, setWeeklyReports] =
-    useState(true);
-
-  const [systemUpdates, setSystemUpdates] =
-    useState(false);
-
-  const [darkMode, setDarkMode] =
-    useState(false);
-
-  const [language, setLanguage] =
-    useState("English (US)");
-
-  const [timezone, setTimezone] =
-    useState(
-      "UTC (Coordinated Universal Time)"
-    );
+  const [criticalAlerts, setCriticalAlerts] = useState(true);
+  const [weeklyReports, setWeeklyReports] = useState(true);
+  const [systemUpdates, setSystemUpdates] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState("English (US)");
+  const [timezone, setTimezone] = useState("UTC (Coordinated Universal Time)");
 
   // Profile
-  const [showEditModal, setShowEditModal] =
-    useState(false);
-
-  const [name, setName] =
-    useState("Captain Miller");
-
-  const [email, setEmail] =
-    useState(
-      "miller.safety@rvms-aviation.com"
-    );
-
-  const [department, setDepartment] =
-    useState("Operations & Safety");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [name, setName] = useState(user?.name || "Captain Miller");
+  const [email, setEmail] = useState(user?.email || "miller.safety@rvms-aviation.com");
+  const [department, setDepartment] = useState(user?.airport || "Operations & Safety");
 
   // Password
-  const [currentPassword, setCurrentPassword] =
-    useState("");
-
-  const [newPassword, setNewPassword] =
-    useState("");
-
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // =========================
   // Handlers
   // =========================
 
-  const handlePasswordUpdate = () => {
-    if (
-      !currentPassword ||
-      !newPassword ||
-      !confirmPassword
-    ) {
+  const handlePasswordUpdate = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
       alert("Please fill all password fields");
       return;
     }
 
-    if (
-      newPassword !== confirmPassword
-    ) {
+    if (newPassword !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    alert("Password Updated Successfully");
+    if (newPassword.length < 6) {
+      alert("New password must be at least 6 characters long");
+      return;
+    }
 
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      const response = await authService.changePassword({
+        email: user?.email || "",
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_new_password: confirmPassword,
+      });
+      alert(response.data?.message || "Password Updated Successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Change password error:", error);
+      alert(error.response?.data?.detail || "Failed to update password");
+    }
   };
 
   const handleSaveProfile = () => {
+    login({
+      user: {
+        ...user,
+        name,
+        email,
+        airport: department,
+      },
+      token,
+    });
     alert("Profile Updated Successfully");
-
     setShowEditModal(false);
   };
 
