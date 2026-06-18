@@ -15,7 +15,9 @@ import 'package:gradiuationg_project/features/onboarding/presentation/screens/on
 import 'package:gradiuationg_project/features/settings/presentation/screens/account_info_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/notifications_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/privacy_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/about_screen.dart';
 import 'package:gradiuationg_project/features/settings/presentation/screens/settings_screen.dart';
+import 'package:gradiuationg_project/features/settings/presentation/screens/change_password_screen.dart';
 import 'package:gradiuationg_project/features/splash/presentation/screens/splash_screen.dart';
 import 'features/auth/presentation/screens/login_screen.dart' show LoginScreen;
 
@@ -33,12 +35,21 @@ class RVMS extends StatelessWidget {
       theme: ThemeData(
         textTheme: ThemeData.light().textTheme,
         primaryTextTheme: ThemeData.light().textTheme,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           titleTextStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
+        ),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.windows: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.linux: CupertinoPageTransitionsBuilder(),
+          },
         ),
       ),
       initialRoute: AppRoutes.managerHomeScreen,
@@ -59,6 +70,8 @@ class RVMS extends StatelessWidget {
         AppRoutes.accountInfo: (context) => const AccountInfoScreen(),
         AppRoutes.notifications: (context) => const NotificationsScreen(),
         AppRoutes.privacy: (context) => const PrivacyScreen(),
+        AppRoutes.about: (context) => const AboutScreen(),
+        AppRoutes.changePassword: (context) => const ChangePasswordScreen(),
         AppRoutes.managerHomeScreen: (context) => const ManagerHomeScreen(),
         AppRoutes.reportHupScreen: (context) => const ReportHubScreen(),
       },

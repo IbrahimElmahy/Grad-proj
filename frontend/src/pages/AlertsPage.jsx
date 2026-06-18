@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -59,6 +60,9 @@ function LiveCamFeed() {
 }
 
 export default function AlertsPage() {
+  const navigate = useNavigate()
+  const [confirmingAlert, setConfirmingAlert] = useState(null)
+
   const {
     filter,
     setFilter,
@@ -82,6 +86,29 @@ export default function AlertsPage() {
 
   const counts  = getCounts()
   const alerts  = getFiltered()
+
+  const exportCSV = () => {
+    const csv = [
+      ["Title", "Description", "Location", "Timestamp", "Severity", "Status"],
+      ...alerts.map((item) => [
+        item.title,
+        item.desc,
+        item.location,
+        item.timestamp,
+        item.severity?.toUpperCase(),
+        item.inspectionStatus || "Active",
+      ]),
+    ]
+      .map((e) => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `alerts-report-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  };
 
   const FILTERS = [
     { key: 'all',      label: `All Severities (${counts.all})` },
@@ -116,7 +143,10 @@ export default function AlertsPage() {
           }`}>
             {liveConnected ? 'Live stream connected' : 'Live stream offline'}
           </span>
-          <button className="btn btn-secondary btn-sm gap-1.5">
+          <button 
+            onClick={exportCSV} 
+            className="btn btn-secondary btn-sm gap-1.5"
+          >
             <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             Export Report
           </button>
@@ -157,6 +187,8 @@ export default function AlertsPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 10 }}
                     transition={{ duration: 0.2 }}
+                    onClick={() => setConfirmingAlert(a)}
+                    className="cursor-pointer hover:bg-slate-50 transition-all"
                   >
                     <td>
                       <Badge variant={a.severity} dot>{a.severity}</Badge>
@@ -171,7 +203,10 @@ export default function AlertsPage() {
                     </td>
                     <td>
                       <button
-                        onClick={() => resolveAlert(a.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmingAlert(a);
+                        }}
                         className="text-[12px] text-brand-500 font-semibold hover:text-brand-700 hover:underline transition-colors"
                       >
                         Acknowledge
@@ -235,6 +270,147 @@ export default function AlertsPage() {
           </ResponsiveContainer>
         </div>
       </div>
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmingAlert && (
+          <AlertConfirmationModal 
+            alert={confirmingAlert} 
+            onClose={() => setConfirmingAlert(null)} 
+            onConfirm={resolveAlert}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function AlertConfirmationModal({ alert, onClose, onConfirm }) {
+  const navigate = useNavigate();
+  const processedImage = alert.processedImage;
+  const imgUrl = processedImage 
+    ? (processedImage.startsWith('http') ? processedImage : `${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'}${processedImage}`)
+    : null;
+  const detections = alert.detections || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+      
+      {/* Modal Box */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 max-w-2xl w-full max-h-[85vh] flex flex-col z-10"
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+              Confirm Alert Action
+              <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold uppercase ${alert.severity === 'critical' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                {alert.severity}
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Location: {alert.location}</p>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all font-semibold"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content (Scrollable) */}
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+          {/* Details Card */}
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+            <h4 className="font-bold text-slate-800 text-sm">{alert.title}</h4>
+            <p className="text-xs text-slate-500 mt-1 leading-relaxed">{alert.desc}</p>
+            <div className="flex gap-4 mt-3 text-[11px] text-slate-400">
+              <span>Time: {alert.time}</span>
+              <span>•</span>
+              <span>Camera ID: {alert.location}</span>
+            </div>
+          </div>
+
+          {/* Alert Image */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Processed Scanned Feed</h4>
+            <div className="bg-slate-50 rounded-2xl overflow-hidden relative min-h-[180px] max-h-[280px] flex items-center justify-center border border-slate-200">
+              {imgUrl ? (
+                <img src={imgUrl} alt="Alert Feed" className="w-full h-full object-contain max-h-[280px]" />
+              ) : (
+                <p className="text-slate-400 text-sm">No feed image available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Detections List */}
+          {detections.length > 0 && (
+            <div>
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detected Hazards ({detections.length})</h4>
+              <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                {detections.map((det, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-2.5 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                    <span className="font-semibold text-slate-800">{det.raw_label || det.object_type}</span>
+                    <div className="flex gap-2">
+                      <span className="text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                        {(det.confidence * 100).toFixed(1)}% Conf
+                      </span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${det.severity === 'HIGH' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}`}>
+                        {det.severity}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              navigate(`/alerts/${alert.id}`);
+            }}
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold text-brand-600 hover:bg-brand-50 border border-brand-200 transition-all"
+          >
+            View Full Report
+          </button>
+          
+          <div className="flex gap-2">
+            <button 
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-500 hover:bg-slate-100 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onConfirm(alert.id);
+                onClose();
+              }}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-brand-500 hover:bg-brand-600 text-white transition-all shadow-sm"
+            >
+              Acknowledge & Resolve
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }

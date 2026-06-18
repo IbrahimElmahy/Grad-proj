@@ -16,20 +16,6 @@ class PrivacyScreen extends StatelessWidget {
   }
 }
 
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _StaticSettingsPage(
-      title: 'About RVMS',
-      icon: Icons.info_outline,
-      body:
-          'Runway Visual Monitoring System helps airport teams review runway inspections, identify hazards, track historical checks, and monitor alert levels from a connected backend dashboard and mobile experience.',
-    );
-  }
-}
-
 class _StaticSettingsPage extends StatelessWidget {
   const _StaticSettingsPage({
     required this.title,

@@ -51,7 +51,7 @@ def classify_detection_label(label: str) -> tuple[str, str]:
     if "person" in normalized or "worker" in normalized:
         return ObjectType.PERSON, RiskLevel.HIGH
     if "aircraft" in normalized or "plane" in normalized:
-        return ObjectType.AIRCRAFT, RiskLevel.SAFE
+        return ObjectType.AIRCRAFT, RiskLevel.HIGH
     if "runway" in normalized:
         return ObjectType.RUNWAY, RiskLevel.SAFE
     return ObjectType.OTHER, RiskLevel.LOW
@@ -67,6 +67,8 @@ def fallback_suggestion(object_type: str, severity: str) -> str:
             return "Immediate action required: stop runway traffic, isolate the spill zone, and dispatch hazmat and firefighting support."
         if object_type in {ObjectType.PERSONNEL, ObjectType.PERSON}:
             return "Immediate action required: clear personnel from the runway and verify access control."
+        if object_type == ObjectType.AIRCRAFT:
+            return "Immediate action required: coordinate runway operations with air traffic control to clear the aircraft incursion."
         return "Immediate action required: secure the area and alert airport operations."
 
     if severity == RiskLevel.MEDIUM:

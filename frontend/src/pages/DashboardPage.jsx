@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -10,12 +11,14 @@ import Badge from '@/components/ui/Badge'
 import { ALERT_TREND_24H } from '@/data/mockData'
 import { formatDateTime, formatRelativeTime, scanService } from '@/services/api'
 
-function ScanHero({ onRefresh }) {
+function ScanHero({ onRefresh, onScanComplete }) {
   const { scanning, scanProgress, startScan } = useAppStore()
   const [lastResult, setLastResult] = useState(null)
   const [uploadError, setUploadError] = useState('')
   const [uploadingName, setUploadingName] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [previewFile, setPreviewFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
   const fileInputRef = useRef(null)
 
   const handleScanClick = () => {
@@ -26,6 +29,12 @@ function ScanHero({ onRefresh }) {
     const file = event.target.files?.[0]
     if (!file) return
 
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
+
+    setPreviewFile(file)
+    setPreviewUrl(URL.createObjectURL(file))
     setLastResult(null)
     setUploadError('')
     setUploadingName(file.name)
@@ -36,6 +45,9 @@ function ScanHero({ onRefresh }) {
       const { data } = await scanService.initiateScan({ file, cameraId: 'Manual Upload' })
       setLastResult(data)
       await onRefresh()
+      if (onScanComplete) {
+        onScanComplete(data)
+      }
     } catch (error) {
       setUploadError(error?.response?.data?.error || error?.message || 'Upload failed.')
     } finally {
@@ -47,20 +59,17 @@ function ScanHero({ onRefresh }) {
 
   return (
     <motion.div
-  className="relative rounded-2xl overflow-hidden mb-6"
-  style={{
-    backgroundImage: 'url(../src/imgs/hero-pic.jpg)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  }}
->
-  {/* dark overlay so text stays readable */}
-  <div className="absolute inset-0 bg-slate-900/70" />
-  
- 
-      
+      className="relative rounded-2xl overflow-hidden mb-6"
+      style={{
+        backgroundImage: 'url(../src/imgs/hero-pic.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* dark overlay so text stays readable */}
+      <div className="absolute inset-0 bg-slate-900/70" />
 
-      <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 p-7">
+      <div className="relative z-10 flex flex-col md:flex-row items-stretch md:items-center gap-6 p-7">
         <div className="flex-1">
           <span className="inline-block bg-brand-500/20 text-brand-300 text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full border border-brand-500/20 mb-3">
             Manual Override
@@ -145,19 +154,45 @@ function ScanHero({ onRefresh }) {
           )}
         </div>
 
-        {/* Runway mini-viz */}
-        
+        {/* Local Preview Area */}
+        {previewUrl && (
+          <div className="w-full md:w-80 h-48 bg-slate-950/90 rounded-2xl overflow-hidden border border-white/15 relative flex items-center justify-center shadow-xl">
+            {previewFile?.type?.startsWith('video/') ? (
+              <video
+                src={previewUrl}
+                controls
+                className="w-full h-full object-contain"
+                autoPlay
+                muted
+              />
+            ) : (
+              <img
+                src={previewUrl}
+                alt="Upload Preview"
+                className="w-full h-full object-contain"
+              />
+            )}
+
+            {/* AI Analyzing Pulsing Badge */}
+            {(scanning || isUploading) && (
+              <div className="absolute top-3 right-3 bg-brand-500/90 text-white text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-md animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                AI Analyzing
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </motion.div>
   )
 }
 
-function ActivityFeed({ scans, loading }) {
+function ActivityFeed({ scans, loading, onSelectScan }) {
   return (
     <div className="card overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
         <h3 className="font-semibold text-slate-800">System Activity Feed</h3>
-        <button className="text-brand-500 text-[13px] font-medium hover:underline">View All Logs</button>
+        <Link to="/history" className="text-brand-500 text-[13px] font-medium hover:underline">View All Logs</Link>
       </div>
       {loading ? (
         <div className="flex justify-center py-8">
@@ -171,7 +206,12 @@ function ActivityFeed({ scans, loading }) {
             </tr></thead>
             <tbody>
               {scans.map((s) => (
-                <tr key={s.id}>
+                <tr 
+                  key={s.id} 
+                  onClick={() => onSelectScan(s)} 
+                  className="cursor-pointer hover:bg-slate-50 transition-all"
+                  title="Click to view details"
+                >
                   <td><span className="font-mono text-[12px] text-brand-500 font-bold">{s.scanLabel}</span></td>
                   <td><span className="font-mono text-[12px] text-slate-500">{s.ts}</span></td>
                   <td><Badge variant={s.status} dot>{s.status}</Badge></td>
@@ -274,8 +314,145 @@ function RightWidgets({ scans }) {
   )
 }
 
+function ScanDetailsModal({ scan, onClose }) {
+  const navigate = useNavigate();
+  const isAlert = scan.status === 'flagged' || scan.status === 'ALERT';
+  const raw = scan.source;
+  const processedVideo = scan.processedVideo || raw?.processed_video;
+  const videoUrl = processedVideo 
+    ? (processedVideo.startsWith('http') ? processedVideo : `${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'}${processedVideo}`)
+    : null;
+  const processedImage = raw?.images?.[0]?.processed_image || raw?.images?.[0]?.image;
+  const imgUrl = processedImage 
+    ? (processedImage.startsWith('http') ? processedImage : `${import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'}${processedImage}`)
+    : null;
+  const detections = raw?.images?.flatMap(i => i.detected_objects || []) || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+      
+      {/* Modal Box */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 max-w-2xl w-full max-h-[85vh] flex flex-col z-10"
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+              Scan Details: {scan.scanLabel}
+              <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold uppercase ${isAlert ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                {scan.riskLevel || (isAlert ? 'HIGH' : 'SAFE')}
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Location: {scan.runway}</p>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all font-semibold"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content (Scrollable) */}
+        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+          {/* Scanned Feed */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+              {videoUrl ? "Scanned Feed Video" : "Scanned Feed Image"}
+            </h4>
+            <div className="bg-slate-50 rounded-2xl overflow-hidden relative min-h-[200px] max-h-[300px] flex items-center justify-center border border-slate-200">
+              {videoUrl ? (
+                <video src={videoUrl} controls autoPlay loop muted className="w-full h-full object-contain max-h-[300px]" />
+              ) : imgUrl ? (
+                <img src={imgUrl} alt="Inspection Feed" className="w-full h-full object-contain max-h-[300px]" />
+              ) : (
+                <p className="text-slate-400 text-sm">No feed media available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Detections */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detected Objects & Issues</h4>
+            <div className="space-y-3">
+              {detections.length > 0 ? (
+                detections.map((det, idx) => (
+                  <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50">
+                    <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-md shadow-sm border border-slate-100">
+                      {det.severity === 'HIGH' ? '⚠️' : '🔍'}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <h5 className="font-semibold text-slate-800 text-sm">{det.raw_label || det.object_type}</h5>
+                        <span className="text-[11px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                          {(det.confidence * 100).toFixed(1)}% Conf
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 mt-1">{det.gemini_suggestion || 'No suggestion available.'}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 bg-green-50/50 border border-green-100 rounded-2xl text-green-700 text-xs flex items-center gap-2">
+                  <span>✓</span> No hazards or debris detected in this scan.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Meta Grid */}
+          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+            <div>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Timestamp</span>
+              <p className="text-sm font-medium text-slate-700 mt-0.5">{formatDateTime(scan.timestamp)}</p>
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">System Status</span>
+              <p className="text-sm font-medium text-slate-700 mt-0.5 capitalize">{scan.status}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+          <button 
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-slate-500 hover:bg-slate-100 transition-all"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              navigate(`/alerts/${scan.id}`);
+            }}
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-brand-500 hover:bg-brand-600 text-white transition-all shadow-sm"
+          >
+            View Full Report
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { scans, loading, error, refresh } = useScans()
+  const [selectedScan, setSelectedScan] = useState(null)
   const latestScan = scans[0]
   const flaggedCount = scans.filter((scan) => scan.status === 'flagged').length
   const runwayStatus = flaggedCount > 0 ? 'Alert' : 'Safe'
@@ -319,7 +496,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <ScanHero onRefresh={refresh} />
+      <ScanHero onRefresh={refresh} onScanComplete={setSelectedScan} />
 
       {error && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -335,9 +512,16 @@ export default function DashboardPage() {
 
       {/* Bottom grid */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
-        <ActivityFeed scans={scans} loading={loading}/>
+        <ActivityFeed scans={scans} loading={loading} onSelectScan={setSelectedScan}/>
         <RightWidgets scans={scans}/>
       </div>
+
+      {/* Details Modal */}
+      <AnimatePresence>
+        {selectedScan && (
+          <ScanDetailsModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

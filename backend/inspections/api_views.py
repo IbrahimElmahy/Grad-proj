@@ -130,7 +130,20 @@ class UploadInspectionView(APIView):
                     frames_rel_path = f"inspections/processed/{date_path}/{inspection.id}"
                     output_dir_base = os.path.join(settings.MEDIA_ROOT, frames_rel_path)
 
-                    frame_results = detector.detect_video(inspection.video.path, output_dir_base)
+                    video_filename = os.path.basename(inspection.video.path)
+                    rel_processed_video_path = f"inspections/processed_videos/{date_path}/{inspection.id}_{video_filename}"
+                    full_processed_video_path = os.path.join(settings.MEDIA_ROOT, rel_processed_video_path)
+
+                    frame_results, out_vid_path = detector.detect_video(
+                        video_path=inspection.video.path,
+                        output_dir_base=output_dir_base,
+                        output_video_path=full_processed_video_path,
+                    )
+
+                    if out_vid_path and os.path.exists(out_vid_path):
+                        inspection.processed_video = rel_processed_video_path
+                        inspection.save(update_fields=['processed_video'])
+
                     for frame_result in frame_results:
                         filename = os.path.basename(frame_result['frame_path'])
                         rel_img_path = f"{frames_rel_path}/{filename}"

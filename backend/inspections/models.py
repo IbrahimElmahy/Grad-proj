@@ -47,6 +47,7 @@ class Inspection(models.Model):
     
     # New Video Field
     video = models.FileField(upload_to='inspections/videos/%Y/%m/%d/', null=True, blank=True, max_length=500)
+    processed_video = models.FileField(upload_to='inspections/processed_videos/%Y/%m/%d/', null=True, blank=True, max_length=500)
     
     def __str__(self):
         return f"Inspection {self.id} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"

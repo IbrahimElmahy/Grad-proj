@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'dart:io' as io;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -36,6 +39,120 @@ class _HomeScreenState extends State<HomeScreen> {
       await future;
     } catch (_) {
       return;
+    }
+  }
+
+  Future<void> _handleNewCheck() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'avi', 'mov'],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        _refreshAlerts();
+        return;
+      }
+
+      final file = result.files.first;
+      final filename = file.name;
+      final isVideo = ['mp4', 'avi', 'mov'].contains(file.extension?.toLowerCase());
+
+      List<int> bytes;
+      if (kIsWeb) {
+        if (file.bytes == null) {
+          throw Exception('Could not read file bytes.');
+        }
+        bytes = file.bytes!;
+      } else {
+        if (file.path == null) {
+          throw Exception('File path is missing.');
+        }
+        bytes = await io.File(file.path!).readAsBytes();
+      }
+
+      // Show uploading overlay dialog
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(color: AppColors.primary),
+                SizedBox(height: 16),
+                Text(
+                  'Uploading Scan Media...',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'AI engine is running detection...',
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Perform upload
+      final newInspection = await _inspectionService.uploadInspection(
+        bytes: bytes,
+        filename: filename,
+        cameraId: 'Manual Upload',
+        isVideo: isVideo,
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Dismiss loading dialog
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white),
+                SizedBox(width: 8),
+                Text('New inspection check uploaded successfully!'),
+              ],
+            ),
+            backgroundColor: Colors.green.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Refresh alerts feed on home screen
+        await _refreshAlerts();
+
+        // Navigate to inspection detail
+        Navigator.pushNamed(
+          context,
+          '/inspection-detail',
+          arguments: newInspection.toAlertModel(),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // If loading dialog is showing, dismiss it
+        Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == '/home');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to perform check: $e'),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        _refreshAlerts();
+      }
     }
   }
 
@@ -85,13 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 18),
                     DraggableCheckBar(
-                      onCompleted: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Use the upload endpoint to start a new AI inspection.'),
-                          ),
-                        );
-                      },
+                      onCompleted: _handleNewCheck,
                     ),
                     const SizedBox(height: 16),
                     if (snapshot.connectionState == ConnectionState.waiting && alerts.isEmpty)

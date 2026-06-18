@@ -60,4 +60,4 @@ class InspectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Inspection
-        fields = ['id', 'camera_id', 'timestamp', 'status', 'risk_level', 'analysis_log', 'video', 'images']
+        fields = ['id', 'camera_id', 'timestamp', 'status', 'risk_level', 'analysis_log', 'video', 'processed_video', 'images']

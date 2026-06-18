@@ -137,3 +137,35 @@ class ResetPasswordAPIView(APIView):
         reset_token.mark_used()
 
         return Response({"message": "Password updated successfully."})
+
+
+class ChangePasswordAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get("email", "").strip()
+        current_password = request.data.get("current_password", "")
+        new_password = request.data.get("new_password", "")
+        confirm_new_password = request.data.get("confirm_new_password", "")
+
+        if not email or not current_password or not new_password or not confirm_new_password:
+            return Response({"detail": "All fields are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if not check_password(current_password, user.password):
+            return Response({"detail": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_password != confirm_new_password:
+            return Response({"detail": "New passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(new_password) < 6:
+            return Response({"detail": "New password must be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        return Response({"message": "Password changed successfully."})
