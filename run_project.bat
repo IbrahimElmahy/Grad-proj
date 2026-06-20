@@ -27,7 +27,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-npm -v >nul 2>&1
+call npm -v >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] npm is not installed or not in your system PATH.
     echo Please install Node.js and npm and try again.
@@ -63,7 +63,7 @@ echo Upgrading pip...
 python -m pip install --upgrade pip
 
 echo Installing backend dependencies (this may take a few minutes for OpenCV/YOLO)...
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to install backend dependencies.
     cd ..
@@ -138,7 +138,7 @@ echo Launching backend and frontend in separate command windows...
 start "RVMS Django Backend" cmd /k "cd backend && call .venv\Scripts\activate && python manage.py runserver 127.0.0.1:8000"
 
 :: Launch frontend
-start "RVMS Vite Frontend" cmd /k "cd frontend && npm run dev"
+start "RVMS Vite Frontend" cmd /k "cd frontend && call npm run dev"
 
 echo.
 echo All processes spawned. Enjoy!
