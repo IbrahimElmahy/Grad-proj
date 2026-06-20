@@ -11,7 +11,7 @@ echo Checking for Python...
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Python is not installed or not in your system PATH.
-    echo Please install Python 3.10+ (specifically Python 3.11 recommended) and try again.
+    echo Please install Python 3.10+ - specifically Python 3.11 recommended - and try again.
     pause
     exit /b 1
 )
@@ -44,7 +44,7 @@ echo ==========================================================
 cd backend
 
 if not exist .venv (
-    echo Creating virtual environment (.venv)...
+    echo Creating virtual environment venv...
     python -m venv .venv
     if !errorlevel! neq 0 (
         echo [ERROR] Failed to create virtual environment.
@@ -53,7 +53,7 @@ if not exist .venv (
         exit /b 1
     )
 ) else (
-    echo Virtual environment (.venv) already exists.
+    echo Virtual environment venv already exists.
 )
 
 echo Activating virtual environment...
@@ -104,7 +104,7 @@ echo ==========================================================
 cd frontend
 
 if not exist node_modules (
-    echo Installing npm packages (this might take a while)...
+    echo Installing npm packages - this might take a while...
     call npm install
     if !errorlevel! neq 0 (
         echo [ERROR] Failed to install frontend npm packages.
