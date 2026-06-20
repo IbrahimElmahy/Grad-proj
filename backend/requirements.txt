@@ -1,2 +1,14 @@
-channels
-daphne
+Django>=5.0,<6.0
+djangorestframework>=3.14.0
+drf-spectacular>=0.26.0
+channels>=4.0.0
+daphne>=4.0.0
+ultralytics>=8.4.35
+opencv-python>=4.8.0
+google-generativeai>=0.8.6
+pillow>=10.0.0
+requests>=2.31.0
+numpy>=1.24.0,<2.5.0
+pymongo>=4.0.0
+django-cors-headers>=4.0.0
+python-dotenv>=1.0.0

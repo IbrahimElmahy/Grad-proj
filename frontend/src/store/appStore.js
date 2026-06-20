@@ -9,6 +9,19 @@ export const useAppStore = create((set, get) => ({
     document.documentElement.classList.toggle('dark', next)
   },
 
+  // Language
+  language: 'English (US)',
+  setLanguage: (lang) => {
+    set({ language: lang })
+    if (lang === 'Arabic') {
+      document.documentElement.dir = 'rtl'
+      document.documentElement.lang = 'ar'
+    } else {
+      document.documentElement.dir = 'ltr'
+      document.documentElement.lang = 'en'
+    }
+  },
+
   // Active scan
   scanning: false,
   scanProgress: 0,

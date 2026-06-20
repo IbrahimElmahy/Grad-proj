@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../store/authStore";
+import { useAppStore } from "../store/appStore";
 import { authService } from "../services/api";
 
 export default function Settings() {
@@ -12,11 +13,15 @@ export default function Settings() {
   const login = useAuthStore((state) => state.login);
   const token = useAuthStore((state) => state.token);
 
+  // App Store for global preferences
+  const darkMode = useAppStore((state) => state.darkMode);
+  const toggleDarkMode = useAppStore((state) => state.toggleDarkMode);
+  const language = useAppStore((state) => state.language);
+  const setLanguage = useAppStore((state) => state.setLanguage);
+
   const [criticalAlerts, setCriticalAlerts] = useState(true);
   const [weeklyReports, setWeeklyReports] = useState(true);
   const [systemUpdates, setSystemUpdates] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("English (US)");
   const [timezone, setTimezone] = useState("UTC (Coordinated Universal Time)");
 
   // Profile
@@ -430,9 +435,7 @@ export default function Settings() {
           </div>
 
           <button
-            onClick={() =>
-              setDarkMode(!darkMode)
-            }
+            onClick={toggleDarkMode}
             className={`w-14 h-7 rounded-full relative transition-all ${
               darkMode
                 ? "bg-brand-500"
