@@ -52,7 +52,7 @@ class RVMS extends StatelessWidget {
           },
         ),
       ),
-      initialRoute: AppRoutes.managerHomeScreen,
+      initialRoute: AppRoutes.splash,
       routes: {
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.onboarding: (context) => const OnboardingScreen(),
