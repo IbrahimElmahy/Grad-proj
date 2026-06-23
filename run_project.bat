@@ -135,7 +135,7 @@ echo.
 echo Launching backend and frontend in separate command windows...
 
 :: Launch backend
-start "RVMS Django Backend" cmd /k "cd backend && call .venv\Scripts\activate && python manage.py runserver 127.0.0.1:8000"
+start "RVMS Django Backend" cmd /k "cd backend && call .venv\Scripts\activate && python manage.py runserver 0.0.0.0:8000"
 
 :: Launch frontend
 start "RVMS Vite Frontend" cmd /k "cd frontend && call npm run dev"

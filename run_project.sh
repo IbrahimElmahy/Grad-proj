@@ -103,7 +103,7 @@ echo
 # Launch Django Backend in the background
 cd backend
 source .venv/bin/activate
-python manage.py runserver 127.0.0.1:8000 &
+python manage.py runserver 0.0.0.0:8000 &
 BACKEND_PID=$!
 cd ..
 
