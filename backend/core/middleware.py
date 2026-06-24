@@ -1,4 +1,5 @@
 import re
+from django.conf import settings
 from django.http import HttpResponse
 
 
@@ -16,7 +17,7 @@ class DevCorsMiddleware:
         "http://localhost:8000",
     }
     
-    LOCAL_ORIGIN_RE = re.compile(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$")
+    LOCAL_ORIGIN_RE = re.compile(r"^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -28,11 +29,17 @@ class DevCorsMiddleware:
             response = self.get_response(request)
 
         origin = request.headers.get("Origin")
-        if origin and (origin in self.ALLOWED_ORIGINS or self.LOCAL_ORIGIN_RE.match(origin)):
-            response["Access-Control-Allow-Origin"] = origin
-            response["Vary"] = "Origin"
-            response["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-            response["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With"
-            response["Access-Control-Allow-Credentials"] = "true"
+        if origin:
+            is_allowed = (
+                settings.DEBUG
+                or origin in self.ALLOWED_ORIGINS
+                or self.LOCAL_ORIGIN_RE.match(origin)
+            )
+            if is_allowed:
+                response["Access-Control-Allow-Origin"] = origin
+                response["Vary"] = "Origin"
+                response["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+                response["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept, Origin, X-Requested-With"
+                response["Access-Control-Allow-Credentials"] = "true"
 
         return response
