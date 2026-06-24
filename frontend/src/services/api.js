@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 30000,
 })
 
@@ -354,20 +354,20 @@ export const authService = {
 
 export const inspectionService = {
   list: async () => {
-    const response = await api.get('/inspections/')
+    const response = await api.get('/api/inspections/')
 
     return response
   },
 
   detail: async (id) => {
-    const response = await api.get(`/inspections/${id}/`)
+    const response = await api.get(`/api/inspections/${id}/`)
 
     return response
   },
 
   upload: async (formData) => {
     const response = await api.post(
-      '/upload/',
+      '/api/upload/',
       formData,
       {
         headers: {

@@ -3,11 +3,16 @@ import 'package:flutter/foundation.dart';
 abstract class ApiConfig {
   static String get baseUrl {
     const configured = String.fromEnvironment('API_BASE_URL');
-    if (configured.isNotEmpty)
+    if (configured.isNotEmpty) {
       return configured.replaceFirst(RegExp(r'/$'), '');
+    }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:8000';
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return 'http://127.0.0.1:8000';
     }
 
     return 'http://127.0.0.1:8000';
