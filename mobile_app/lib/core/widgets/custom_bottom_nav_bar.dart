@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../features/auth/data/auth_session.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -12,7 +13,12 @@ class CustomBottomNavBar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+        final role = AuthSession.user?.role.toLowerCase() ?? '';
+        if (role == 'admin') {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+        }
         break;
       case 1:
         Navigator.pushReplacementNamed(context, AppRoutes.history);

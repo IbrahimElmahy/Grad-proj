@@ -46,10 +46,16 @@ class _SplashScreenState extends State<SplashScreen>
 
     Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
-      Navigator.pushReplacementNamed(
-        context,
-        AuthSession.isSignedIn ? AppRoutes.home : AppRoutes.welcome,
-      );
+        if (AuthSession.isSignedIn) {
+          final role = AuthSession.user?.role.toLowerCase() ?? '';
+          if (role == 'admin') {
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+          } else {
+            Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+        }
     });
   }
 

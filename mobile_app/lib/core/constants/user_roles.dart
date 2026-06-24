@@ -1,6 +1,6 @@
 enum UserRole {
+  admin,
   officer,
-  ground,
   manager,
 }
 
@@ -10,7 +10,7 @@ class UserPermissions {
   }
 
   static bool canAccessAlerts(UserRole role) {
-    return role == UserRole.officer || role == UserRole.ground;
+    return role == UserRole.officer || role == UserRole.manager;
   }
 
   static bool canAccessHistory(UserRole role) {
