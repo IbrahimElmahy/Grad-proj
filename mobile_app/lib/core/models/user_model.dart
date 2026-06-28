@@ -7,7 +7,8 @@ class UserModel {
   UserModel({required this.name, required this.role, });
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      role: json['role'], name: json['name'], 
+      name: json['name'] as String? ?? 'RVMS User',
+      role: UserPermissions.fromString(json['role'] as String? ?? 'officer'),
     );
   }
 }
