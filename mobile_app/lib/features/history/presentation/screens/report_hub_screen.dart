@@ -81,41 +81,6 @@ class _ReportHubScreenState extends State<ReportHubScreen> {
                 ),
               ),
               const SizedBox(height: 44),
-              // const Row(
-              //   children: [
-              //     Expanded(
-              //       child: _ReportTypeButton(
-              //         title: 'Daily Report',
-              //         isSelected: true,
-              //       ),
-              //     ),
-              //     SizedBox(width: 22),
-              //     Expanded(
-              //       child: _ReportTypeButton(
-              //         title: 'WeeklyReport',
-              //         isSelected: true,
-              //       ),
-              //     ),
-              //   ],
-              // ),
-              // const SizedBox(height: 18),
-              // const Row(
-              //   children: [
-              //     Expanded(
-              //       child: _ReportTypeButton(
-              //         title: 'Monthly Report',
-              //         isSelected: false,
-              //       ),
-              //     ),
-              //     SizedBox(width: 22),
-              //     Expanded(
-              //       child: _ReportTypeButton(
-              //         title: 'Yearly Report',
-              //         isSelected: false,
-              //       ),
-              //     ),
-              //   ],
-              // ),
               const SizedBox(height: 34),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

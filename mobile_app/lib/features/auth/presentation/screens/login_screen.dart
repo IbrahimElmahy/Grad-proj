@@ -45,10 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
       await _authService.login(email: email, password: password);
       if (!mounted) return;
       final user = AuthSession.user;
-      if (user?.role.toLowerCase() == UserRole.admin.name) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
-      } else {
+      if (user?.role.toLowerCase() == UserRole.manager.name) {
         Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     } catch (error) {
       if (!mounted) return;
