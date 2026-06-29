@@ -273,7 +273,7 @@ function buildWebSocketUrl(pathname) {
 export const authService = {
   login: async (email, password) => {
     try {
-      const response = await api.post('/auth/login/', {
+      const response = await api.post('/api/auth/login/', {
         email,
         password,
       })
@@ -308,7 +308,7 @@ export const authService = {
 
   forgotPassword: async (email) => {
     const response = await api.post(
-      '/auth/forgot-password/',
+      '/api/auth/forgot-password/',
       { email }
     )
 
@@ -321,7 +321,7 @@ export const authService = {
     password_confirm,
   }) => {
     const response = await api.post(
-      '/auth/reset-password/',
+      '/api/auth/reset-password/',
       {
         token,
         password,
@@ -339,7 +339,7 @@ export const authService = {
     confirm_new_password,
   }) => {
     const response = await api.post(
-      '/auth/change-password/',
+      '/api/auth/change-password/',
       {
         email,
         current_password,

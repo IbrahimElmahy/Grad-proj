@@ -7,14 +7,14 @@ from ultralytics import YOLO
 
 
 class YoloDetector:
-    _model_4 = None
-    _model_7 = None
+    _model = None
 
     SEVERITY_RULES = {
         "debris": "High",
         "fod": "High",
         "wildlife_birds": "High",
         "bird": "High",
+        "birds": "High",
         "wildlife": "High",
         "fuel_spill": "High",
         "fuel": "High",
@@ -23,7 +23,9 @@ class YoloDetector:
         "personnel": "High",
         "person": "High",
         "vehicle": "Medium",
+        "vehicles": "Medium",
         "crack": "Medium",
+        "cracks": "Medium",
         "pothole": "Medium",
         "standing_water": "Medium",
         "standing water": "Medium",
@@ -43,22 +45,17 @@ class YoloDetector:
     }
 
     @classmethod
+    def get_model(cls):
+        if cls._model is None:
+            path = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best.pt")
+            print(f"Loading YOLO model from: {path}")
+            cls._model = YOLO(path)
+        return cls._model
+
+    @classmethod
     def get_models(cls):
-        if cls._model_4 is None:
-            path4 = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best_4c.pt")
-            if not os.path.exists(path4):
-                path4 = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best.pt")
-            print(f"Loading YOLO 4-class model from: {path4}")
-            cls._model_4 = YOLO(path4)
-
-        if cls._model_7 is None:
-            path7 = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best_7c.pt")
-            if not os.path.exists(path7):
-                path7 = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best.pt")
-            print(f"Loading YOLO 7-class model from: {path7}")
-            cls._model_7 = YOLO(path7)
-
-        return cls._model_4, cls._model_7
+        # Kept for backward compatibility
+        return cls.get_model(), None
 
     @staticmethod
     def _utc_now_iso():
@@ -149,7 +146,7 @@ class YoloDetector:
 
             # Heuristic: If classified as bird/wildlife but highly vertical (aspect ratio > 1.8),
             # it is almost certainly a human (personnel). Reclassify it to avoid looking silly.
-            if label_lower in ["wildlife_birds", "bird"] and width > 0 and (height / width) > 1.8:
+            if label_lower in ["wildlife_birds", "bird", "birds"] and width > 0 and (height / width) > 1.8:
                 label = "Personnel"
                 label_lower = "personnel"
 
@@ -185,49 +182,37 @@ class YoloDetector:
         if frame is None:
             raise ValueError(f"Unable to read image: {image_path}")
 
-        model4, model7 = self.get_models()
-        # Disable CLAHE preprocessing to avoid washing out textures of objects like luggage and aircraft
+        model = self.get_model()
         preprocessed_frame = frame
         annotated_frame = frame.copy()
 
-        # Run 4-class model for Runway, Aircraft, Vehicle, Bird
-        results4 = model4.predict(
+        # Run YOLO model for all 8 classes
+        results = model.predict(
             source=preprocessed_frame,
             conf=0.08,
             iou=0.45,
             verbose=False,
         )
-        detections4 = self._process_tracking_result(
-            result=results4[0],
-            allowed_classes={"runway", "aircraft", "bird", "vehicle"},
-            min_confidence_mapping={"bird": 0.40, "aircraft": 0.09},
-            frame_index=0,
-            frame_timestamp_seconds=None,
-        )
-
-        # Run 7-class model for Debris, Wildlife_Birds, Cracks, Luggage, Personnel
-        results7 = model7.predict(
-            source=preprocessed_frame,
-            conf=0.08,
-            iou=0.45,
-            verbose=False,
-        )
-        detections7 = self._process_tracking_result(
-            result=results7[0],
-            allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel"},
+        detections = self._process_tracking_result(
+            result=results[0],
+            allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
             min_confidence_mapping={
                 "personnel": 0.55,
                 "luggage": 0.10,
                 "debris": 0.10,
                 "cracks": 0.22,
-                "wildlife_birds": 0.15,
-                "aircraft": 0.09
+                "birds": 0.15,
+                "bird": 0.15,
+                "vehicles": 0.25,
+                "vehicle": 0.25,
+                "aircraft": 0.09,
+                "runway": 0.05
             },
             frame_index=0,
             frame_timestamp_seconds=None,
         )
 
-        detections = self._resolve_conflicts(detections4 + detections7)
+        detections = self._resolve_conflicts(detections)
 
         # Draw resolved detections on annotated_frame
         for d in detections:
@@ -265,13 +250,12 @@ class YoloDetector:
             fourcc = cv2.VideoWriter_fourcc(*'avc1')
             writer = cv2.VideoWriter(output_video_path, fourcc, fps, (w, h))
 
-        model4, model7 = self.get_models()
+        model = self.get_model()
         
-        # Reset trackers for both models before processing a new video
-        for model in [model4, model7]:
-            if getattr(model, "predictor", None) is not None and hasattr(model.predictor, "trackers"):
-                for tracker in model.predictor.trackers:
-                    tracker.reset()
+        # Reset trackers before processing a new video
+        if getattr(model, "predictor", None) is not None and hasattr(model.predictor, "trackers"):
+            for tracker in model.predictor.trackers:
+                tracker.reset()
 
         frame_results = []
         frame_index = -1
@@ -284,12 +268,11 @@ class YoloDetector:
 
                 frame_index += 1
                 frame_timestamp_seconds = round(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0, 3)
-                # Disable CLAHE preprocessing to avoid washing out textures of objects like luggage and aircraft
                 preprocessed_frame = frame
                 annotated_frame = frame.copy()
 
-                # Run 4-class model
-                results4 = model4.track(
+                # Run model tracking
+                results = model.track(
                     source=preprocessed_frame,
                     conf=0.08,
                     iou=0.45,
@@ -297,39 +280,26 @@ class YoloDetector:
                     tracker="bytetrack.yaml",
                     verbose=False,
                 )
-                detections4 = self._process_tracking_result(
-                    result=results4[0],
-                    allowed_classes={"runway", "aircraft", "bird", "vehicle"},
-                    min_confidence_mapping={"bird": 0.40, "aircraft": 0.09},
-                    frame_index=frame_index,
-                    frame_timestamp_seconds=frame_timestamp_seconds,
-                )
-
-                # Run 7-class model
-                results7 = model7.track(
-                    source=preprocessed_frame,
-                    conf=0.08,
-                    iou=0.45,
-                    persist=True,
-                    tracker="bytetrack.yaml",
-                    verbose=False,
-                )
-                detections7 = self._process_tracking_result(
-                    result=results7[0],
-                    allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel"},
+                detections = self._process_tracking_result(
+                    result=results[0],
+                    allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
                     min_confidence_mapping={
                         "personnel": 0.55,
                         "luggage": 0.10,
                         "debris": 0.10,
                         "cracks": 0.22,
-                        "wildlife_birds": 0.15,
-                        "aircraft": 0.09
+                        "birds": 0.15,
+                        "bird": 0.15,
+                        "vehicles": 0.25,
+                        "vehicle": 0.25,
+                        "aircraft": 0.09,
+                        "runway": 0.05
                     },
                     frame_index=frame_index,
                     frame_timestamp_seconds=frame_timestamp_seconds,
                 )
 
-                detections = self._resolve_conflicts(detections4 + detections7)
+                detections = self._resolve_conflicts(detections)
 
                 # Draw final resolved detections
                 for d in detections:
@@ -415,8 +385,8 @@ class YoloDetector:
     def _resolve_conflicts(cls, detections):
         # 1. First, suppress birds/wildlife_birds that overlap with any non-bird detections (both passing and failing conf)
         birds_resolved = []
-        birds = [d for d in detections if d["label"].lower() in ["bird", "wildlife_birds"]]
-        non_birds = [d for d in detections if d["label"].lower() not in ["bird", "wildlife_birds"]]
+        birds = [d for d in detections if d["label"].lower() in ["bird", "birds", "wildlife_birds"]]
+        non_birds = [d for d in detections if d["label"].lower() not in ["bird", "birds", "wildlife_birds"]]
         
         for b in birds:
             overlap = False
