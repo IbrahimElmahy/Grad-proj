@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_config.dart';
 import 'auth_session.dart';
 import 'models/app_user.dart';
 
@@ -45,6 +49,50 @@ class AuthService {
       'password': password,
       'password_confirm': passwordConfirm,
     });
+  }
+
+  Future<AppUser> updateProfile({
+    required int userId,
+    String? name,
+    List<int>? imageBytes,
+    String? imageName,
+  }) async {
+    final uri = ApiConfig.uri('/api/auth/update-profile/');
+    final request = http.MultipartRequest('POST', uri);
+    request.fields['user_id'] = userId.toString();
+    if (name != null) {
+      request.fields['name'] = name;
+    }
+
+    if (imageBytes != null && imageName != null) {
+      final multipartFile = http.MultipartFile.fromBytes(
+        'profile_picture',
+        imageBytes,
+        filename: imageName,
+        contentType: MediaType(
+          'image',
+          imageName.split('.').last,
+        ),
+      );
+      request.files.add(multipartFile);
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final decodedBody = jsonDecode(response.body);
+      if (decodedBody is Map<String, dynamic>) {
+        final user = AppUser.fromJson(decodedBody['user'] as Map<String, dynamic>);
+        AuthSession.user = user;
+        return user;
+      }
+      throw Exception('Invalid server response format.');
+    } else {
+      final decodedBody = jsonDecode(response.body);
+      final error = decodedBody is Map ? (decodedBody['detail'] ?? decodedBody['error'] ?? 'Update failed.') : 'Update failed.';
+      throw Exception(error);
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/auth_session.dart';
 import '../widgets/logout_tile.dart';
 import '../widgets/settings_item.dart';
@@ -86,25 +87,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Initials Avatar
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          initials,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
+                    // Initials Avatar or Network Image
+                    user?.profilePicture != null && user!.profilePicture!.isNotEmpty
+                        ? UserAvatar(
+                            imagePath: user.profilePicture,
+                            size: 64,
+                          )
+                        : Container(
+                            width: 64,
+                            height: 64,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                initials,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
                     const SizedBox(width: 16),
                     // User Details
                     Expanded(

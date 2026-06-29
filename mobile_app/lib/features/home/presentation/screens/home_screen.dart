@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const UserAvatar(imagePath: 'assets/images/user_image.jpg'),
+                        UserAvatar(imagePath: user?.profilePicture ?? 'assets/images/user_image.jpg'),
                         const SizedBox(width: 10),
                         Expanded(
                           child: UserWelcomeColumn(

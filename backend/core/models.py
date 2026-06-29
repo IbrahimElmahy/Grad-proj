@@ -9,7 +9,7 @@ def generate_reset_token():
 
 # Create your models here.
 class User(AbstractUser):
-    pass
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
 class SystemSettings(models.Model):
     singleton_id = models.IntegerField(default=1, unique=True)

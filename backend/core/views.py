@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import PasswordResetToken
 from .serializers import ForgotPasswordSerializer, LoginSerializer, ResetPasswordSerializer
@@ -45,6 +46,7 @@ def build_user_payload(user):
         "email": user.email,
         "role": "Manager" if user.is_superuser or user.username == "manager" else "Safety Officer",
         "airport": "RVMS Operations",
+        "profile_picture": user.profile_picture.url if user.profile_picture else None,
     }
 
 
@@ -169,3 +171,39 @@ class ChangePasswordAPIView(APIView):
         user.save(update_fields=["password"])
 
         return Response({"message": "Password changed successfully."})
+
+
+class UpdateProfileAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response({"detail": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        name = request.data.get("name")
+        if name is not None:
+            name = name.strip()
+            name_parts = name.split(" ", 1)
+            user.first_name = name_parts[0]
+            user.last_name = name_parts[1] if len(name_parts) > 1 else ""
+
+        profile_picture = request.FILES.get("profile_picture")
+        if profile_picture is not None:
+            user.profile_picture = profile_picture
+
+        user.save()
+
+        return Response(
+            {
+                "message": "Profile updated successfully.",
+                "user": build_user_payload(user),
+            }
+        )

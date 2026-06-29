@@ -13,6 +13,11 @@ class ManagerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthSession.user;
+    final userName = user?.name ?? 'Ramy';
+    final userRole = user?.role ?? 'Safety Manager';
+    final profilePic = user?.profilePicture;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
@@ -22,15 +27,15 @@ class ManagerHomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
-              children: const [
-                SizedBox(height: 12),
+              children: [
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    UserAvatar(imagePath: 'assets/images/user_image.jpg'),
-                    SizedBox(width: 10),
+                    UserAvatar(imagePath: profilePic ?? 'assets/images/user_image.jpg'),
+                    const SizedBox(width: 10),
                     UserWelcomeColumn(
-                      userName: 'Ramy',
-                      userRole: 'Safety Manager',
+                      userName: userName,
+                      userRole: userRole,
                     ),
                   ],
                 ),
