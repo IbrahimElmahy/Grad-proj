@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradiuationg_project/core/constants/constants.dart';
+import 'package:gradiuationg_project/core/constants/user_roles.dart';
 import 'package:gradiuationg_project/features/auth/data/auth_session.dart';
 import 'dart:async';
 import '../../../../core/theme/app_colors.dart';
@@ -46,16 +47,16 @@ class _SplashScreenState extends State<SplashScreen>
 
     Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
-        if (AuthSession.isSignedIn) {
-          final role = AuthSession.user?.role.toLowerCase() ?? '';
-          if (role == 'admin') {
-            Navigator.pushReplacementNamed(context, AppRoutes.home);
-          } else {
-            Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
-          }
+      if (AuthSession.isSignedIn) {
+        final role = AuthSession.user?.role.toLowerCase() ?? '';
+        if (role == UserRole.manager.name) {
+          Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
         } else {
-          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      }
     });
   }
 
@@ -84,7 +85,8 @@ class _SplashScreenState extends State<SplashScreen>
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.primary.withOpacity(0.12 - (index * 0.03)),
+                      color:
+                          AppColors.primary.withOpacity(0.12 - (index * 0.03)),
                       width: 1.5,
                     ),
                   ),

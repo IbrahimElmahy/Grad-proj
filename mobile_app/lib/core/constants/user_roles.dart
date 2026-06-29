@@ -1,7 +1,7 @@
 enum UserRole {
-  admin,
-  officer,
   manager,
+  ground,
+  officer,
 }
 
 class UserPermissions {
@@ -19,5 +19,12 @@ class UserPermissions {
 
   static bool canAccessSettings(UserRole role) {
     return role == UserRole.officer;
+  }
+
+  static UserRole fromString(String value) {
+    return UserRole.values.firstWhere(
+      (role) => role.name.toLowerCase() == value.toLowerCase(),
+      orElse: () => UserRole.officer,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/constants.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
+import 'package:gradiuationg_project/core/constants/user_roles.dart';
+import 'package:gradiuationg_project/core/theme/app_colors.dart';
 import '../../../../features/auth/data/auth_session.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -14,17 +15,28 @@ class CustomBottomNavBar extends StatelessWidget {
     switch (index) {
       case 0:
         final role = AuthSession.user?.role.toLowerCase() ?? '';
-        if (role == 'admin') {
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
-        } else {
+        if (role == UserRole.manager.name) {
           Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
         break;
       case 1:
         Navigator.pushReplacementNamed(context, AppRoutes.history);
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, AppRoutes.alerts);
+        final role = AuthSession.user?.role.toLowerCase() ?? '';
+        if (role == UserRole.officer.name || role == UserRole.manager.name) {
+          Navigator.pushReplacementNamed(context, AppRoutes.alerts);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Alerts access is limited to officers and managers.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
         break;
       case 3:
         Navigator.pushReplacementNamed(context, AppRoutes.settings);
