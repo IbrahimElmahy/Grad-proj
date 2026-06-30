@@ -44,21 +44,26 @@ echo Setting up Django Backend...
 echo ==========================================================
 cd backend
 
-if not exist .venv (
-    echo Creating virtual environment venv...
-    python -m venv .venv
-    if !errorlevel! neq 0 (
-        echo [ERROR] Failed to create virtual environment.
-        cd ..
-        pause
-        exit /b 1
-    )
+if exist ..\.venv311_cuda (
+    echo [OK] GPU-accelerated virtual environment .venv311_cuda detected.
+    echo Activating GPU virtual environment...
+    call ..\.venv311_cuda\Scripts\activate
 ) else (
-    echo Virtual environment venv already exists.
+    if not exist .venv (
+        echo Creating virtual environment venv...
+        python -m venv .venv
+        if !errorlevel! neq 0 (
+            echo [ERROR] Failed to create virtual environment.
+            cd ..
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo Virtual environment venv already exists.
+    )
+    echo Activating virtual environment...
+    call .venv\Scripts\activate
 )
-
-echo Activating virtual environment...
-call .venv\Scripts\activate
 
 echo Upgrading pip...
 python -m pip install --upgrade pip
@@ -136,7 +141,11 @@ echo.
 echo Launching backend and frontend in separate command windows...
 
 :: Launch backend
-start "RVMS Django Backend" cmd /k "cd backend && call .venv\Scripts\activate && python manage.py runserver 0.0.0.0:8000"
+if exist .venv311_cuda (
+    start "RVMS Django Backend" cmd /k "call .venv311_cuda\Scripts\activate && cd backend && python manage.py runserver 0.0.0.0:8000"
+) else (
+    start "RVMS Django Backend" cmd /k "cd backend && call .venv\Scripts\activate && python manage.py runserver 0.0.0.0:8000"
+)
 
 :: Launch frontend
 start "RVMS Vite Frontend" cmd /k "cd frontend && call npm run dev"

@@ -15,6 +15,7 @@ ai/outputs/
 ai/datasets/
 ai/configs/
 *.pt
+!backend/ai_engine/models/*.pt
 OVERNIGHT_REPORT.txt
 
 # Media
