@@ -293,6 +293,7 @@ class YoloDetector:
 
         frame_results = []
         frame_index = -1
+        last_detections = []
 
         try:
             while True:
@@ -302,6 +303,29 @@ class YoloDetector:
 
                 frame_index += 1
                 frame_timestamp_seconds = round(cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0, 3)
+
+                should_skip_yolo = (frame_skip > 1 and frame_index % frame_skip != 0)
+
+                if should_skip_yolo:
+                    if writer is not None:
+                        # Draw last detections so bounding boxes remain visible and smooth
+                        annotated_frame = frame.copy()
+                        for d in last_detections:
+                            bbox = d["bbox"]
+                            self._draw_detection(
+                                frame=annotated_frame,
+                                x1=bbox["x1"],
+                                y1=bbox["y1"],
+                                x2=bbox["x2"],
+                                y2=bbox["y2"],
+                                label=d["label"],
+                                confidence=d["confidence"],
+                                severity=d["severity"],
+                                track_id=d.get("track_id"),
+                            )
+                        writer.write(annotated_frame)
+                    continue
+
                 # Disable CLAHE preprocessing to avoid washing out textures of objects like luggage and aircraft
                 preprocessed_frame = frame
                 annotated_frame = frame.copy()
@@ -349,6 +373,7 @@ class YoloDetector:
                 )
 
                 detections = self._resolve_conflicts(detections4 + detections7)
+                last_detections = detections
 
                 # Draw final resolved detections
                 for d in detections:
@@ -367,9 +392,6 @@ class YoloDetector:
 
                 if writer is not None:
                     writer.write(annotated_frame)
-
-                if frame_skip > 1 and frame_index % frame_skip != 0:
-                    continue
 
                 if not detections:
                     continue
