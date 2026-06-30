@@ -153,6 +153,23 @@ class YoloDetector:
                 label = "Personnel"
                 label_lower = "personnel"
 
+            # Heuristic: If classified as aircraft but has narrow/square aspect ratio,
+            # or is in foreground (lower half of image) but is small in width,
+            # it is likely debris (FOD) or personnel. Reclassify it to avoid false aircraft alerts.
+            if label_lower == "aircraft" and getattr(result, "orig_shape", None) is not None:
+                orig_h, orig_w = result.orig_shape
+                is_foreground = (y2 > 0.5 * orig_h)
+                is_small_in_foreground = is_foreground and (width < 0.65 * orig_w)
+                is_non_aircraft_aspect = (height > 0 and width / height < 1.3)
+                
+                if is_small_in_foreground or is_non_aircraft_aspect:
+                    if height > 0 and (height / width) > 1.2:
+                        label = "Personnel"
+                        label_lower = "personnel"
+                    else:
+                        label = "Debris"
+                        label_lower = "debris"
+
             severity = self._severity_for_label(label)
 
             detections.append(
@@ -199,8 +216,8 @@ class YoloDetector:
         )
         detections4 = self._process_tracking_result(
             result=results4[0],
-            allowed_classes={"runway", "aircraft", "bird", "vehicle"},
-            min_confidence_mapping={"bird": 0.40, "aircraft": 0.09},
+            allowed_classes={"runway", "aircraft", "bird", "vehicle", "debris", "personnel"},
+            min_confidence_mapping={"bird": 0.40, "aircraft": 0.20, "debris": 0.10, "personnel": 0.10},
             frame_index=0,
             frame_timestamp_seconds=None,
         )
@@ -214,14 +231,15 @@ class YoloDetector:
         )
         detections7 = self._process_tracking_result(
             result=results7[0],
-            allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel"},
+            allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel", "aircraft", "vehicles"},
             min_confidence_mapping={
                 "personnel": 0.55,
                 "luggage": 0.10,
                 "debris": 0.10,
                 "cracks": 0.22,
                 "wildlife_birds": 0.15,
-                "aircraft": 0.09
+                "aircraft": 0.20,
+                "vehicles": 0.25
             },
             frame_index=0,
             frame_timestamp_seconds=None,
@@ -299,8 +317,8 @@ class YoloDetector:
                 )
                 detections4 = self._process_tracking_result(
                     result=results4[0],
-                    allowed_classes={"runway", "aircraft", "bird", "vehicle"},
-                    min_confidence_mapping={"bird": 0.40, "aircraft": 0.09},
+                    allowed_classes={"runway", "aircraft", "bird", "vehicle", "debris", "personnel"},
+                    min_confidence_mapping={"bird": 0.40, "aircraft": 0.20, "debris": 0.10, "personnel": 0.10},
                     frame_index=frame_index,
                     frame_timestamp_seconds=frame_timestamp_seconds,
                 )
@@ -316,14 +334,15 @@ class YoloDetector:
                 )
                 detections7 = self._process_tracking_result(
                     result=results7[0],
-                    allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel"},
+                    allowed_classes={"debris", "wildlife_birds", "cracks", "luggage", "personnel", "aircraft", "vehicles"},
                     min_confidence_mapping={
                         "personnel": 0.55,
                         "luggage": 0.10,
                         "debris": 0.10,
                         "cracks": 0.22,
                         "wildlife_birds": 0.15,
-                        "aircraft": 0.09
+                        "aircraft": 0.20,
+                        "vehicles": 0.25
                     },
                     frame_index=frame_index,
                     frame_timestamp_seconds=frame_timestamp_seconds,
@@ -456,4 +475,11 @@ class YoloDetector:
         # Merge and only keep detections that pass confidence mapping
         all_resolved = birds_resolved + final_non_birds
         final_passed = [d for d in all_resolved if d.get("passes_conf", True)]
+
+        # Dynamic aircraft severity based on count in this frame/image
+        aircraft_detections = [d for d in final_passed if d["label"].lower() == "aircraft"]
+        if len(aircraft_detections) <= 1:
+            for d in aircraft_detections:
+                d["severity"] = "Low"
+
         return final_passed

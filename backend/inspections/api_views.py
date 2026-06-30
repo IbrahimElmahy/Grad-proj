@@ -18,7 +18,7 @@ from .hazard_utils import (
     is_alert_level,
     utc_now_iso,
 )
-from .models import DetectedObject, Inspection, InspectionImage, RiskLevel
+from .models import DetectedObject, Inspection, InspectionImage, RiskLevel, ObjectType
 from .realtime import broadcast_inspection_alert
 from .serializers import InspectionSerializer
 
@@ -203,6 +203,8 @@ class UploadInspectionView(APIView):
             inspection_image = detection.get('image_obj')
 
             object_type, severity = classify_detection_label(raw_label)
+            if object_type == ObjectType.AIRCRAFT and detection.get('severity') == 'Low':
+                severity = RiskLevel.LOW
             suggestion = _generate_suggestion(advisor, object_type, severity)
 
             detected_object = DetectedObject.objects.create(
