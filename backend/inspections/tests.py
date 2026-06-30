@@ -73,3 +73,38 @@ class UploadInspectionViewTests(APITestCase):
 
         self.assertEqual(response.data['analysis_log']['inspection_risk_level'], RiskLevel.HIGH)
         self.assertEqual(response.data['images'][0]['detected_objects'][0]['bbox_xywh']['w'], 60)
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    @patch('inspections.api_views.GeminiAdvisor')
+    @patch('inspections.api_views.YoloDetector')
+    def test_image_upload_aircraft_severity_dynamic(self, detector_cls, advisor_cls):
+        detector = detector_cls.return_value
+        detector.detect.return_value = [
+            {
+                'label': 'aircraft',
+                'confidence': 0.85,
+                'severity': 'Low',
+                'detected_at_utc': '2026-04-08T11:22:33.456Z',
+                'frame_index': 0,
+                'frame_timestamp_seconds': None,
+                'bbox': {'x': 10, 'y': 10, 'w': 100, 'h': 100, 'x1': 10, 'y1': 10, 'x2': 110, 'y2': 110},
+            }
+        ]
+        advisor = advisor_cls.return_value
+        advisor.model = None
+
+        response = self.client.post(
+            reverse('api_upload_inspection'),
+            {
+                'camera_id': 'CAM-01',
+                'image': SimpleUploadedFile('frame.jpg', b'fake-image-bytes', content_type='image/jpeg'),
+            },
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, 201)
+
+        inspection = Inspection.objects.get()
+        detected_object = DetectedObject.objects.get()
+        self.assertEqual(detected_object.severity, RiskLevel.LOW)
+        self.assertEqual(inspection.risk_level, RiskLevel.LOW)
+        self.assertEqual(inspection.status, Inspection.Status.COMPLETED)

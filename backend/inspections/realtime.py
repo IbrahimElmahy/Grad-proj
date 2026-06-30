@@ -10,11 +10,7 @@ def _critical_detections(detections: list[dict]) -> list[dict]:
     critical = []
     for detection in detections:
         severity = detection.get("hazard_severity")
-        object_type = detection.get("object_type")
-        raw_label = str(detection.get("raw_label") or "").lower()
-        is_aircraft_incursion = object_type == ObjectType.AIRCRAFT or "aircraft" in raw_label
-
-        if severity == RiskLevel.HIGH or is_aircraft_incursion:
+        if severity == RiskLevel.HIGH:
             critical.append(detection)
     return critical
 
