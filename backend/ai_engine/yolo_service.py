@@ -7,7 +7,7 @@ from ultralytics import YOLO
 
 
 class YoloDetector:
-    _model = None
+    _models = None
 
     SEVERITY_RULES = {
         "debris": "High",
@@ -45,17 +45,28 @@ class YoloDetector:
     }
 
     @classmethod
+    def _resolve_model_path(cls, filename):
+        return os.path.join(settings.BASE_DIR, "ai_engine", "models", filename)
+
+    @classmethod
     def get_model(cls):
-        if cls._model is None:
-            path = os.path.join(settings.BASE_DIR, "ai_engine", "models", "best.pt")
-            print(f"Loading YOLO model from: {path}")
-            cls._model = YOLO(path)
-        return cls._model
+        models = cls.get_models()
+        return models[0] if models else None
 
     @classmethod
     def get_models(cls):
-        # Kept for backward compatibility
-        return cls.get_model(), None
+        if cls._models is None:
+            model_files = ["best.pt", "best_4c.pt", "best_7c.pt"]
+            cls._models = []
+            for filename in model_files:
+                path = cls._resolve_model_path(filename)
+                if not os.path.exists(path):
+                    print(f"Skipping missing YOLO model: {path}")
+                    continue
+                print(f"Loading YOLO model from: {path}")
+                cls._models.append(YOLO(path))
+
+        return cls._models
 
     @staticmethod
     def _utc_now_iso():
@@ -199,35 +210,43 @@ class YoloDetector:
         if frame is None:
             raise ValueError(f"Unable to read image: {image_path}")
 
-        model = self.get_model()
+        models = self.get_models()
         preprocessed_frame = frame
         annotated_frame = frame.copy()
 
-        # Run YOLO model for all 8 classes
-        results = model.predict(
-            source=preprocessed_frame,
-            conf=0.08,
-            iou=0.45,
-            verbose=False,
-        )
-        detections = self._process_tracking_result(
-            result=results[0],
-            allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
-            min_confidence_mapping={
-                "personnel": 0.55,
-                "luggage": 0.10,
-                "debris": 0.10,
-                "cracks": 0.22,
-                "birds": 0.15,
-                "bird": 0.15,
-                "vehicles": 0.25,
-                "vehicle": 0.25,
-                "aircraft": 0.09,
-                "runway": 0.05
-            },
-            frame_index=0,
-            frame_timestamp_seconds=None,
-        )
+        all_results = []
+        for model in models:
+            results = model.predict(
+                source=preprocessed_frame,
+                conf=0.08,
+                iou=0.45,
+                verbose=False,
+            )
+            if results:
+                all_results.extend(results)
+
+        detections = []
+        for result in all_results:
+            detections.extend(
+                self._process_tracking_result(
+                    result=result,
+                    allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
+                    min_confidence_mapping={
+                        "personnel": 0.55,
+                        "luggage": 0.10,
+                        "debris": 0.10,
+                        "cracks": 0.22,
+                        "birds": 0.15,
+                        "bird": 0.15,
+                        "vehicles": 0.25,
+                        "vehicle": 0.25,
+                        "aircraft": 0.09,
+                        "runway": 0.05,
+                    },
+                    frame_index=0,
+                    frame_timestamp_seconds=None,
+                )
+            )
 
         detections = self._resolve_conflicts(detections)
 
@@ -267,12 +286,13 @@ class YoloDetector:
             fourcc = cv2.VideoWriter_fourcc(*'avc1')
             writer = cv2.VideoWriter(output_video_path, fourcc, fps, (w, h))
 
-        model = self.get_model()
+        models = self.get_models()
         
         # Reset trackers before processing a new video
-        if getattr(model, "predictor", None) is not None and hasattr(model.predictor, "trackers"):
-            for tracker in model.predictor.trackers:
-                tracker.reset()
+        for model in models:
+            if getattr(model, "predictor", None) is not None and hasattr(model.predictor, "trackers"):
+                for tracker in model.predictor.trackers:
+                    tracker.reset()
 
         frame_results = []
         frame_index = -1
@@ -313,33 +333,42 @@ class YoloDetector:
                 preprocessed_frame = frame
                 annotated_frame = frame.copy()
 
-                # Run model tracking
-                results = model.track(
-                    source=preprocessed_frame,
-                    conf=0.08,
-                    iou=0.45,
-                    persist=True,
-                    tracker="bytetrack.yaml",
-                    verbose=False,
-                )
-                detections = self._process_tracking_result(
-                    result=results[0],
-                    allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
-                    min_confidence_mapping={
-                        "personnel": 0.55,
-                        "luggage": 0.10,
-                        "debris": 0.10,
-                        "cracks": 0.22,
-                        "birds": 0.15,
-                        "bird": 0.15,
-                        "vehicles": 0.25,
-                        "vehicle": 0.25,
-                        "aircraft": 0.09,
-                        "runway": 0.05
-                    },
-                    frame_index=frame_index,
-                    frame_timestamp_seconds=frame_timestamp_seconds,
-                )
+                # Run all model variants and combine their detections
+                all_results = []
+                for model in models:
+                    results = model.track(
+                        source=preprocessed_frame,
+                        conf=0.08,
+                        iou=0.45,
+                        persist=True,
+                        tracker="bytetrack.yaml",
+                        verbose=False,
+                    )
+                    if results:
+                        all_results.extend(results)
+
+                detections = []
+                for result in all_results:
+                    detections.extend(
+                        self._process_tracking_result(
+                            result=result,
+                            allowed_classes={"debris", "birds", "vehicles", "cracks", "luggage", "personnel", "aircraft", "runway"},
+                            min_confidence_mapping={
+                                "personnel": 0.55,
+                                "luggage": 0.10,
+                                "debris": 0.10,
+                                "cracks": 0.22,
+                                "birds": 0.15,
+                                "bird": 0.15,
+                                "vehicles": 0.25,
+                                "vehicle": 0.25,
+                                "aircraft": 0.09,
+                                "runway": 0.05,
+                            },
+                            frame_index=frame_index,
+                            frame_timestamp_seconds=frame_timestamp_seconds,
+                        )
+                    )
 
                 detections = self._resolve_conflicts(detections)
                 last_detections = detections
