@@ -50,7 +50,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.image,
         withData: true,
       );
