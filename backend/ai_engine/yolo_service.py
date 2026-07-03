@@ -34,7 +34,7 @@ class YoloDetector:
         "cone_or_barrier": "Medium",
         "cone": "Medium",
         "barrier": "Medium",
-        "runway": "Low",
+        "runway": "Safe",
         "aircraft": "High",
     }
 
@@ -42,6 +42,7 @@ class YoloDetector:
         "High": (0, 0, 255),
         "Medium": (0, 165, 255),
         "Low": (0, 200, 0),
+        "Safe": (0, 200, 0),
     }
 
     @classmethod
@@ -161,22 +162,7 @@ class YoloDetector:
                 label = "Personnel"
                 label_lower = "personnel"
 
-            # Heuristic: If classified as aircraft but has narrow/square aspect ratio,
-            # or is in foreground (lower half of image) but is small in width,
-            # it is likely debris (FOD) or personnel. Reclassify it to avoid false aircraft alerts.
-            if label_lower == "aircraft" and getattr(result, "orig_shape", None) is not None:
-                orig_h, orig_w = result.orig_shape
-                is_foreground = (y2 > 0.5 * orig_h)
-                is_small_in_foreground = is_foreground and (width < 0.65 * orig_w)
-                is_non_aircraft_aspect = (height > 0 and width / height < 1.3)
-                
-                if is_small_in_foreground or is_non_aircraft_aspect:
-                    if height > 0 and (height / width) > 1.2:
-                        label = "Personnel"
-                        label_lower = "personnel"
-                    else:
-                        label = "Debris"
-                        label_lower = "debris"
+
 
             severity = self._severity_for_label(label)
 
@@ -500,6 +486,9 @@ class YoloDetector:
         aircraft_detections = [d for d in final_passed if d["label"].lower() == "aircraft"]
         if len(aircraft_detections) <= 1:
             for d in aircraft_detections:
-                d["severity"] = "Low"
+                d["severity"] = "Safe"
+        else:
+            for d in aircraft_detections:
+                d["severity"] = "High"
 
         return final_passed

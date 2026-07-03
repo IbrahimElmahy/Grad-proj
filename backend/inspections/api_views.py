@@ -203,8 +203,15 @@ class UploadInspectionView(APIView):
             inspection_image = detection.get('image_obj')
 
             object_type, severity = classify_detection_label(raw_label)
-            if object_type == ObjectType.AIRCRAFT and detection.get('severity') == 'Low':
+            det_sev = detection.get('severity')
+            if det_sev == 'Safe':
+                severity = RiskLevel.SAFE
+            elif det_sev == 'Low':
                 severity = RiskLevel.LOW
+            elif det_sev == 'Medium':
+                severity = RiskLevel.MEDIUM
+            elif det_sev == 'High':
+                severity = RiskLevel.HIGH
             suggestion = _generate_suggestion(advisor, object_type, severity)
 
             detected_object = DetectedObject.objects.create(
