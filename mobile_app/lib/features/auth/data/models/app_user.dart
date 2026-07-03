@@ -1,3 +1,5 @@
+import 'package:gradiuationg_project/core/constants/user_roles.dart';
+
 class AppUser {
   const AppUser({
     required this.id,
@@ -18,12 +20,15 @@ class AppUser {
   final String? profilePicture;
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
+    final roleString = json['role'] as String? ?? 'officer';
+    final normalizedRole = UserPermissions.fromString(roleString).name.toLowerCase();
+
     return AppUser(
       id: json['id'] as int? ?? 0,
       username: json['username'] as String? ?? '',
       name: json['name'] as String? ?? 'RVMS User',
       email: json['email'] as String? ?? '',
-      role: json['role'] as String? ?? 'Safety Officer',
+      role: normalizedRole,
       airport: json['airport'] as String? ?? 'RVMS Operations',
       profilePicture: json['profile_picture'] as String?,
     );

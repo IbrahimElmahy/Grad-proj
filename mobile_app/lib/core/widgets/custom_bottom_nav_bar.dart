@@ -15,7 +15,7 @@ class CustomBottomNavBar extends StatelessWidget {
     switch (index) {
       case 0:
         final role = AuthSession.user?.role.toLowerCase() ?? '';
-        if (role == UserRole.manager.name) {
+        if (role == UserRole.manager.name.toLowerCase()) {
           Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
@@ -26,7 +26,9 @@ class CustomBottomNavBar extends StatelessWidget {
         break;
       case 2:
         final role = AuthSession.user?.role.toLowerCase() ?? '';
-        if (role == UserRole.officer.name || role == UserRole.manager.name) {
+
+        if (role == UserRole.officer.name.toLowerCase() ||
+            role == UserRole.manager.name.toLowerCase()) {
           Navigator.pushReplacementNamed(context, AppRoutes.alerts);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

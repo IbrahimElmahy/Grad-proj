@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final file = result.files.first;
       final filename = file.name;
-      final isVideo = ['mp4', 'avi', 'mov'].contains(file.extension?.toLowerCase());
+      final isVideo =
+          ['mp4', 'avi', 'mov'].contains(file.extension?.toLowerCase());
 
       List<int> bytes;
       if (kIsWeb) {
@@ -65,10 +66,25 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         bytes = file.bytes!;
       } else {
-        if (file.path == null) {
-          throw Exception('File path is missing.');
+        // Try to read from file path first
+        if (file.path != null) {
+          try {
+            bytes = await io.File(file.path!).readAsBytes();
+          } catch (e) {
+            // If file path fails, try to use file.bytes as fallback
+            if (file.bytes != null && file.bytes!.isNotEmpty) {
+              bytes = file.bytes!;
+            } else {
+              throw Exception('Failed to read file. Please try again.');
+            }
+          }
+        } else if (file.bytes != null && file.bytes!.isNotEmpty) {
+          // Use file.bytes if path is not available
+          bytes = file.bytes!;
+        } else {
+          throw Exception(
+              'Could not read file bytes. Please check file permissions.');
         }
-        bytes = await io.File(file.path!).readAsBytes();
       }
 
       // Show uploading overlay dialog
@@ -142,7 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       if (mounted) {
         // If loading dialog is showing, dismiss it
-        Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == '/home');
+        Navigator.of(context).popUntil(
+            (route) => route.isFirst || route.settings.name == '/home');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -158,7 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _countTodaysChecks(List<AlertModel> alerts) {
     final now = DateTime.now();
-    final today = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    final today =
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
     return alerts.where((alert) => alert.date == today).length;
   }
 
@@ -184,7 +202,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        UserAvatar(imagePath: user?.profilePicture ?? 'assets/images/user_image.jpg'),
+                        UserAvatar(
+                            imagePath: user?.profilePicture ??
+                                'assets/images/user_image.jpg'),
                         const SizedBox(width: 10),
                         Expanded(
                           child: UserWelcomeColumn(
@@ -197,7 +217,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 20),
                     HomeStatsSection(
                       todaysChecks: _countTodaysChecks(alerts),
-                      lastStatus: alerts.isEmpty ? 'No data' : alerts.first.statusText,
+                      lastStatus:
+                          alerts.isEmpty ? 'No data' : alerts.first.statusText,
                       nextCheck: 'On demand',
                     ),
                     const SizedBox(height: 18),
@@ -205,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       onCompleted: _handleNewCheck,
                     ),
                     const SizedBox(height: 16),
-                    if (snapshot.connectionState == ConnectionState.waiting && alerts.isEmpty)
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        alerts.isEmpty)
                       const Padding(
                         padding: EdgeInsets.only(top: 40),
                         child: CircularProgressIndicator(),
@@ -220,7 +242,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const _HomeMessage(
                         icon: Icons.fact_check_outlined,
                         title: 'No inspections yet',
-                        message: 'Inspection history will appear here after the backend receives uploads.',
+                        message:
+                            'Inspection history will appear here after the backend receives uploads.',
                       )
                     else
                       ListView.separated(
