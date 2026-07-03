@@ -22,8 +22,18 @@ class UserPermissions {
   }
 
   static UserRole fromString(String value) {
+    final val = value.toLowerCase();
+    if (val.contains('manager')) {
+      return UserRole.manager;
+    }
+    if (val.contains('officer')) {
+      return UserRole.officer;
+    }
+    if (val.contains('ground')) {
+      return UserRole.ground;
+    }
     return UserRole.values.firstWhere(
-      (role) => role.name.toLowerCase() == value.toLowerCase(),
+      (role) => role.name.toLowerCase() == val,
       orElse: () => UserRole.officer,
     );
   }

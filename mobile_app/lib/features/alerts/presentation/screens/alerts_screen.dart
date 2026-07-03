@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
+import 'package:gradiuationg_project/features/auth/data/auth_session.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../inspections/data/inspection_service.dart';
@@ -364,6 +366,17 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!AuthSession.isSignedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),

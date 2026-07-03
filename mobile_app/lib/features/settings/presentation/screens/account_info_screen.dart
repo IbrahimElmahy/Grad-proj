@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
 import '../../../auth/data/auth_session.dart';
@@ -49,8 +50,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
+        withData: true,
       );
       if (result != null && result.files.single.bytes != null) {
         setState(() {
@@ -110,6 +112,17 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!AuthSession.isSignedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final user = AuthSession.user;
     final userName = user?.name ?? 'Safety Officer';
     final userRole = user?.role ?? 'Safety Officer';

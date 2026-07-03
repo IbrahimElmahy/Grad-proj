@@ -28,7 +28,9 @@ class CustomBottomNavBar extends StatelessWidget {
         final role = AuthSession.user?.role.toLowerCase() ?? '';
 
         if (role == UserRole.officer.name.toLowerCase() ||
-            role == UserRole.manager.name.toLowerCase()) {
+            role == UserRole.manager.name.toLowerCase() ||
+            role.contains('officer') ||
+            role.contains('manager')) {
           Navigator.pushReplacementNamed(context, AppRoutes.alerts);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

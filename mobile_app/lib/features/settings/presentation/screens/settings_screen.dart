@@ -33,6 +33,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!AuthSession.isSignedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final user = AuthSession.user;
     final userName = user?.name ?? 'Safety Officer';
     final userEmail = user?.email ?? 'officer@rvms.com';

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' as io;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/user_avatar.dart';
@@ -44,9 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleNewCheck() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'mp4', 'avi', 'mov'],
+        withData: true,
       );
 
       if (result == null || result.files.isEmpty) {
@@ -182,6 +184,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!AuthSession.isSignedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),

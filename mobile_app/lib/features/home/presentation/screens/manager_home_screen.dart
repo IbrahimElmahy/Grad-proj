@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gradiuationg_project/core/constants/constants.dart';
 import 'package:gradiuationg_project/core/widgets/custom_bottom_nav_bar.dart';
 import 'package:gradiuationg_project/features/auth/data/auth_session.dart';
 import 'package:gradiuationg_project/features/home/presentation/widgets/active_officers_section.dart';
@@ -14,6 +15,17 @@ class ManagerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!AuthSession.isSignedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final user = AuthSession.user;
     final userName = user?.name ?? 'Ramy';
     final userRole = user?.role ?? 'Safety Manager';
