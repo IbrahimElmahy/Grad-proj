@@ -34,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     if (!AuthSession.isSignedIn) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, AppRoutes.welcome);
       });
       return const Scaffold(

@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final isVideo =
           ['mp4', 'avi', 'mov'].contains(file.extension?.toLowerCase());
 
-      List<int> bytes;
+      List<int> bytes = [];
       if (kIsWeb) {
         if (file.bytes == null) {
           throw Exception('Could not read file bytes.');
@@ -185,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (!AuthSession.isSignedIn) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, AppRoutes.welcome);
       });
       return const Scaffold(
