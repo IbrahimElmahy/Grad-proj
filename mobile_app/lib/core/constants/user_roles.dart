@@ -1,6 +1,6 @@
 enum UserRole {
+  controller,
   manager,
-  ground,
   officer,
 }
 
@@ -10,7 +10,7 @@ class UserPermissions {
   }
 
   static bool canAccessAlerts(UserRole role) {
-    return role == UserRole.officer || role == UserRole.manager;
+    return role == UserRole.officer || role == UserRole.manager || role == UserRole.controller;
   }
 
   static bool canAccessHistory(UserRole role) {
@@ -18,19 +18,19 @@ class UserPermissions {
   }
 
   static bool canAccessSettings(UserRole role) {
-    return role == UserRole.officer;
+    return role == UserRole.officer || role == UserRole.controller;
   }
 
   static UserRole fromString(String value) {
     final val = value.toLowerCase();
+    if (val.contains('controller')) {
+      return UserRole.controller;
+    }
     if (val.contains('manager')) {
       return UserRole.manager;
     }
     if (val.contains('officer')) {
       return UserRole.officer;
-    }
-    if (val.contains('ground')) {
-      return UserRole.ground;
     }
     return UserRole.values.firstWhere(
       (role) => role.name.toLowerCase() == val,

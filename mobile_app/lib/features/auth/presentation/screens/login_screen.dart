@@ -45,7 +45,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await _authService.login(email: email, password: password);
       if (!mounted) return;
       final user = AuthSession.user;
-      if (user?.role.toLowerCase() == UserRole.manager.name) {
+      if (user?.role.toLowerCase() == UserRole.manager.name ||
+          user?.role.toLowerCase() == UserRole.controller.name) {
         Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
       } else {
         Navigator.pushReplacementNamed(context, AppRoutes.home);

@@ -28,7 +28,7 @@ class ManagerHomeScreen extends StatelessWidget {
 
     final user = AuthSession.user;
     final userName = user?.name ?? 'Ramy';
-    final userRole = user?.role ?? 'Safety Manager';
+    final userRole = (user?.role ?? 'Safety Manager').replaceFirst(user?.role[0] ?? '', (user?.role[0] ?? '').toUpperCase());
     final profilePic = user?.profilePicture;
 
     return Scaffold(

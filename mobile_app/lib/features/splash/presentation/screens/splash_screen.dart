@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
       if (AuthSession.isSignedIn) {
         final role = AuthSession.user?.role.toLowerCase() ?? '';
-        if (role == UserRole.manager.name) {
+        if (role == UserRole.manager.name || role == UserRole.controller.name) {
           Navigator.pushReplacementNamed(context, AppRoutes.managerHomeScreen);
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.home);

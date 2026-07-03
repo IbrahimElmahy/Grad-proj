@@ -44,7 +44,7 @@ def build_user_payload(user):
         "username": user.username,
         "name": full_name,
         "email": user.email,
-        "role": "Manager" if user.is_superuser or user.username == "manager" else "Safety Officer",
+        "role": "Controller" if user.is_superuser else ("Manager" if user.username == "manager" else "Safety Officer"),
         "airport": "RVMS Operations",
         "profile_picture": user.profile_picture.url if user.profile_picture else None,
     }
