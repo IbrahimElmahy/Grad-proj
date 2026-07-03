@@ -14,11 +14,10 @@ class AlertCard extends StatelessWidget {
       case AlertSeverity.safe:
         return AppColors.safe;
       case AlertSeverity.low:
-        return const Color(0xffB7E4C7);
       case AlertSeverity.medium:
-        return AppColors.medium;
+        return AppColors.warning;
       case AlertSeverity.highRisk:
-        return AppColors.highRisk;
+        return AppColors.critical;
     }
   }
 
@@ -109,7 +108,8 @@ class AlertCard extends StatelessWidget {
                   right: 12,
                   bottom: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(.64),
                       borderRadius: BorderRadius.circular(20),
@@ -159,7 +159,8 @@ class AlertCard extends StatelessWidget {
     );
   }
 
-  Widget _imageErrorBuilder(BuildContext context, Object error, StackTrace? stackTrace) {
+  Widget _imageErrorBuilder(
+      BuildContext context, Object error, StackTrace? stackTrace) {
     return _imagePlaceholder();
   }
 

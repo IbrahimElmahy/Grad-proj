@@ -108,11 +108,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
       case AlertSeverity.safe:
         return AppColors.safe;
       case AlertSeverity.low:
-        return const Color(0xffB7E4C7);
       case AlertSeverity.medium:
-        return AppColors.medium;
+        return AppColors.warning;
       case AlertSeverity.highRisk:
-        return AppColors.highRisk;
+        return AppColors.critical;
     }
   }
 
@@ -163,7 +162,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: _severityColor(inspection.severity),
                             borderRadius: BorderRadius.circular(20),
@@ -195,7 +195,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
                           errorBuilder: (_, __, ___) => Container(
                             height: 180,
                             color: Colors.grey.shade100,
-                            child: const Icon(Icons.image_not_supported_outlined, size: 40, color: Colors.grey),
+                            child: const Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 40,
+                                color: Colors.grey),
                           ),
                         ),
                       ),
@@ -219,65 +222,73 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         if (inspection.detections.isEmpty)
                           const Text(
                             'No specific hazards cataloged.',
-                            style: TextStyle(fontSize: 13, color: AppColors.textGrey),
+                            style: TextStyle(
+                                fontSize: 13, color: AppColors.textGrey),
                           )
                         else
                           ...inspection.detections.map((det) => Container(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        det.displayLabel,
+                                margin: const EdgeInsets.only(bottom: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            det.displayLabel,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.textDark,
+                                            ),
+                                          ),
+                                          if (det.geminiSuggestion
+                                              .trim()
+                                              .isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              det.geminiSuggestion,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.red.shade700,
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          ]
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border:
+                                            Border.all(color: AppColors.border),
+                                      ),
+                                      child: Text(
+                                        det.confidencePercent,
                                         style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.textDark,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
                                         ),
                                       ),
-                                      if (det.geminiSuggestion.trim().isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          det.geminiSuggestion,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.red.shade700,
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ]
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.border),
-                                  ),
-                                  child: Text(
-                                    det.confidencePercent,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          )),
+                              )),
                       ],
                     ),
                   ),
@@ -304,7 +315,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                           ),
                           child: const Text(
                             'Acknowledge & Resolve',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -314,15 +326,19 @@ class _AlertsScreenState extends State<AlertsScreen> {
                               child: OutlinedButton(
                                 onPressed: () => Navigator.pop(context),
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  side: const BorderSide(color: AppColors.border),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  side:
+                                      const BorderSide(color: AppColors.border),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                                 child: const Text(
                                   'Cancel',
-                                  style: TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: AppColors.textGrey,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -338,15 +354,19 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                   );
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  side: const BorderSide(color: AppColors.primary),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  side: const BorderSide(
+                                      color: AppColors.primary),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                                 child: const Text(
                                   'View Report',
-                                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -399,7 +419,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+                    icon: const Icon(Icons.refresh_rounded,
+                        color: AppColors.primary),
                     onPressed: _fetchAlerts,
                   ),
                 ],
@@ -432,12 +453,16 @@ class _AlertsScreenState extends State<AlertsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-          const Icon(Icons.cloud_off_rounded, size: 54, color: AppColors.textGrey),
+          const Icon(Icons.cloud_off_rounded,
+              size: 54, color: AppColors.textGrey),
           const SizedBox(height: 16),
           const Center(
             child: Text(
               'Connection failed',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark),
             ),
           ),
           const SizedBox(height: 8),
@@ -458,7 +483,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ),
@@ -471,12 +497,16 @@ class _AlertsScreenState extends State<AlertsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.18),
-          const Icon(Icons.verified_user_rounded, size: 54, color: Colors.green),
+          const Icon(Icons.verified_user_rounded,
+              size: 54, color: Colors.green),
           const SizedBox(height: 16),
           const Center(
             child: Text(
               'No active alerts',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark),
             ),
           ),
           const SizedBox(height: 6),

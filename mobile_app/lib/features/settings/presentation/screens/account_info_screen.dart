@@ -224,7 +224,8 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             ),
                           ),
                         )
-                      else if (user?.profilePicture != null && user!.profilePicture!.isNotEmpty)
+                      else if (user?.profilePicture != null &&
+                          user!.profilePicture!.isNotEmpty)
                         UserAvatar(
                           imagePath: user.profilePicture,
                           size: 84,
@@ -248,7 +249,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             ),
                           ),
                         ),
-                      
+
                       // Camera overlay if editing
                       if (_isEditing)
                         Positioned(
@@ -285,7 +286,8 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                         decoration: const InputDecoration(
                           hintText: 'Enter your name',
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.primary, width: 2),
+                            borderSide:
+                                BorderSide(color: AppColors.primary, width: 2),
                           ),
                         ),
                         style: const TextStyle(

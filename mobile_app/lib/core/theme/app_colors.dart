@@ -8,9 +8,13 @@ abstract class AppColors {
   static const Color textGrey = Color(0xff666666);
   static const Color border = Color(0xffD3DAE6);
 
-  static const Color safe = Color(0xff58F25B);
-  static const Color medium = Color(0xffFFD54F);
-  static const Color highRisk = Color(0xffF6A63A);
+  static const Color safe = Color(0xff22C55E);
+  static const Color warning = Color(0xffFACC15);
+  static const Color critical = Color(0xffEF4444);
+
+  // Backward-compatible aliases for existing code paths.
+  static const Color medium = warning;
+  static const Color highRisk = critical;
 
   static const LinearGradient navIconGradient = LinearGradient(
     begin: Alignment.topCenter,

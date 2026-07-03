@@ -39,11 +39,10 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
       case AlertSeverity.safe:
         return AppColors.safe;
       case AlertSeverity.low:
-        return const Color(0xffB7E4C7);
       case AlertSeverity.medium:
-        return AppColors.medium;
+        return AppColors.warning;
       case AlertSeverity.highRisk:
-        return AppColors.highRisk;
+        return AppColors.critical;
     }
   }
 
@@ -97,7 +96,8 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 7),
                           decoration: BoxDecoration(
                             color: _statusColor(inspection.severity),
                             borderRadius: BorderRadius.circular(20),
@@ -118,8 +118,12 @@ class _InspectionDetailScreenState extends State<InspectionDetailScreen> {
                     _InfoRow(label: 'Time', value: inspection.time),
                     _InfoRow(label: 'Status', value: inspection.status),
                     _InfoRow(label: 'Risk level', value: inspection.riskLevel),
-                    _InfoRow(label: 'Detections', value: inspection.detectionCount.toString()),
-                    _InfoRow(label: 'Hazards', value: inspection.hazardCount.toString()),
+                    _InfoRow(
+                        label: 'Detections',
+                        value: inspection.detectionCount.toString()),
+                    _InfoRow(
+                        label: 'Hazards',
+                        value: inspection.hazardCount.toString()),
                   ],
                 ),
               ),
@@ -244,7 +248,8 @@ class _DetectionTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               item.geminiSuggestion,
-              style: const TextStyle(fontSize: 12, color: AppColors.textDark, height: 1.35),
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textDark, height: 1.35),
             ),
           ],
         ],
@@ -297,7 +302,8 @@ class _ImagePlaceholder extends StatelessWidget {
       height: 230,
       color: Colors.grey.shade200,
       child: Center(
-        child: Icon(Icons.image_not_supported_outlined, color: Colors.grey.shade600, size: 42),
+        child: Icon(Icons.image_not_supported_outlined,
+            color: Colors.grey.shade600, size: 42),
       ),
     );
   }
@@ -337,7 +343,8 @@ class _MessagePanel extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: AppColors.textGrey, height: 1.4),
+            style: const TextStyle(
+                fontSize: 13, color: AppColors.textGrey, height: 1.4),
           ),
         ],
       ),

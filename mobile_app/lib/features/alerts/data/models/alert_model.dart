@@ -24,7 +24,8 @@ class AlertModel {
     final firstImage = images.whereType<Map<String, dynamic>>().isNotEmpty
         ? images.whereType<Map<String, dynamic>>().first
         : null;
-    final detections = firstImage?['detected_objects'] as List<dynamic>? ?? const [];
+    final detections =
+        firstImage?['detected_objects'] as List<dynamic>? ?? const [];
     final riskLevel = (json['risk_level'] as String? ?? 'SAFE').toUpperCase();
 
     return AlertModel(
@@ -33,7 +34,8 @@ class AlertModel {
       date: formatDate(json['timestamp'] as String?),
       time: formatTime(json['timestamp'] as String?),
       statusText: statusLabel(riskLevel),
-      imagePath: (firstImage?['processed_image'] ?? firstImage?['image'] ?? '') as String,
+      imagePath: (firstImage?['processed_image'] ?? firstImage?['image'] ?? '')
+          as String,
       severity: AlertSeverity.fromRiskLevel(riskLevel),
       detectionCount: detections.length,
     );
@@ -53,7 +55,11 @@ class AlertModel {
   static String formatTime(String? value) {
     final date = parseTimestamp(value);
     if (date == null) return '--:--';
-    final hour = date.hour == 0 ? 12 : date.hour > 12 ? date.hour - 12 : date.hour;
+    final hour = date.hour == 0
+        ? 12
+        : date.hour > 12
+            ? date.hour - 12
+            : date.hour;
     final period = date.hour >= 12 ? 'PM' : 'AM';
     return '${hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')} $period';
   }
@@ -61,11 +67,10 @@ class AlertModel {
   static String statusLabel(String riskLevel) {
     switch (riskLevel) {
       case 'HIGH':
-        return 'High Risk';
+        return 'Critical';
       case 'MEDIUM':
-        return 'Medium Risk';
       case 'LOW':
-        return 'Low Risk';
+        return 'Warning';
       default:
         return 'Safe';
     }
